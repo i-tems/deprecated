@@ -1,0 +1,38 @@
+# 한국경제 RSS collector — KOSPI 1차 보도. TASK-3 §1.1 S-KR-2.
+# */5 cron. 한경 robots: User-agent:* 에 /article/* 허용 — 일반 UA 무관.
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: news-hankyung
+  labels:
+    owner: items
+spec:
+  dag:
+    interval: "@daily"
+    start_date: "2026-05-24"
+    catchup: false
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: collect_and_transform
+      image: registry.lab.i-tems.com/items-data-product-news-hankyung:main
+      cmds: ["/app/run.sh"]
+      cpu: "500m"
+      memory: "1Gi"
+      envFrom:
+        - data-platform-creds
+      env_vars:
+        ICEBERG_CATALOG: "polaris"
+        ICEBERG_NAMESPACE: "news"
+        ICEBERG_TABLE: "hankyung_raw"
+        HANKYUNG_USER_AGENT: "Mozilla/5.0 (compatible; cell-items-rss-reader/1.0)"
+        # 섹션별 피드 — economy/finance/it 가 KOSPI 테마 신호 커버리지 핵심.
+        HANKYUNG_FEEDS: |
+          [
+            {"name": "economy", "url": "https://www.hankyung.com/feed/economy", "market": "KOSPI"},
+            {"name": "finance", "url": "https://www.hankyung.com/feed/finance", "market": "KOSPI"},
+            {"name": "it",      "url": "https://www.hankyung.com/feed/it",      "market": "KOSPI"}
+          ]
+  relation: |
+    collect_and_transform

@@ -1,0 +1,31 @@
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: signal-triage
+  labels:
+    owner: items
+spec:
+  dag:
+    interval: "@hourly"
+    start_date: "2026-05-23"
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    # Hub 위임 패턴 — 이 task 는 claude 를 직접 띄우지 않는다.
+    # trigger.py 가 cell 별 emitted Signal 개수를 조회해 0 보다 큰 cell 에만
+    # task.create 를 호출하고, 이후 처리는 hub agent-loop → worker pod →
+    # /triaging-signals skill 이 담당한다. signal 0 인 cell 은 워커 spawn 자체가
+    # 일어나지 않아 토큰 비용 0.
+    - name: trigger
+      image: registry.lab.i-tems.com/infra-ai-signal-triage:main
+      cmds: ["/app/run.sh"]
+      cpu: "100m"
+      memory: "128Mi"
+      # hive-caller-creds: HUB_URL + HUB_INTERNAL_TOKEN
+      # (trigger.py 가 INTERNAL_TOKEN 으로 caller JWT mint 후 cell.list/
+      # signal.list/task.create 호출용).
+      envFrom:
+        - hive-caller-creds
+  relation: |
+    trigger

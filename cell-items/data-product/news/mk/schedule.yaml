@@ -1,0 +1,39 @@
+# 매일경제(MK) RSS collector — KOSPI 1차 보도. TASK-3 §1.1 S-KR-3.
+# robots: AI 봇 UA Disallow:/ — collect.py 진입 시 UA 패턴 검사 (코드 강제).
+# section codes: 30000001=헤드라인, 50100032=증권, 30100041=경제.
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: news-mk
+  labels:
+    owner: items
+spec:
+  dag:
+    interval: "@daily"
+    start_date: "2026-05-24"
+    catchup: false
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: collect_and_transform
+      image: registry.lab.i-tems.com/items-data-product-news-mk:main
+      cmds: ["/app/run.sh"]
+      cpu: "500m"
+      memory: "1Gi"
+      envFrom:
+        - data-platform-creds
+      env_vars:
+        ICEBERG_CATALOG: "polaris"
+        ICEBERG_NAMESPACE: "news"
+        ICEBERG_TABLE: "mk_raw"
+        # 일반 browser-like UA — AI 봇 패턴 매치 시 collect.py 가 exit 2.
+        MK_USER_AGENT: "Mozilla/5.0 (compatible; cell-items-rss-reader/1.0)"
+        MK_FEEDS: |
+          [
+            {"name": "headline",  "url": "https://www.mk.co.kr/rss/30000001/", "section_code": "30000001", "market": "KOSPI"},
+            {"name": "stock",     "url": "https://www.mk.co.kr/rss/50100032/", "section_code": "50100032", "market": "KOSPI"},
+            {"name": "economy",   "url": "https://www.mk.co.kr/rss/30100041/", "section_code": "30100041", "market": "KOSPI"}
+          ]
+  relation: |
+    collect_and_transform

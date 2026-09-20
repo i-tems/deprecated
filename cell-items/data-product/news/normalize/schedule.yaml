@@ -1,0 +1,39 @@
+# Normalize + score + gate (TASK-3 §4.1~4.5).
+# - 입력: polaris.news.{gdelt,edgar,globenewswire,hankyung,mk}_raw  (slice 4 후속에 dart_raw 추가)
+# - 출력: polaris.news.clusters (overwritePartitions for current dt)
+#
+# 클러스터링 윈도가 24h 라 @hourly 로 매 시간 같은 dt 를 재클러스터링.
+# overwritePartitions 모드로 멱등 — 매 run 이 같은 일자 partition 만 덮어쓴다.
+#
+# 5개 raw fetcher DAG (waitFor) 가 같은 일자 데이터를 적재한 뒤 본 DAG 이
+# 실행되므로 wait_assets 대신 cron 만으로 충분 (raw 폴링 주기가 5~15분).
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: news-normalize
+  labels:
+    owner: items
+spec:
+  dag:
+    interval: "@daily"
+    start_date: "2026-05-24"
+    catchup: false
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: normalize
+      image: registry.lab.i-tems.com/items-data-product-news-normalize:main
+      cmds: ["/app/run.sh"]
+      cpu: "1"
+      memory: "2Gi"
+      envFrom:
+        - data-platform-creds
+      env_vars:
+        ICEBERG_CATALOG: "polaris"
+        ICEBERG_NAMESPACE: "news"
+        CLUSTERS_TABLE: "clusters"
+        # NORMALIZE_DATE 비워두면 KST 오늘. backfill 은 schedule.run 으로
+        # NORMALIZE_DATE 를 일자별 덮어써 호출.
+  relation: |
+    normalize

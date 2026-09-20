@@ -1,0 +1,32 @@
+# 파이프라인 A (producer) — 별개 DAG. 자기 @hourly cron 으로 실행되고
+# 완료 시 leaf task 가 Asset(schedule://cell-items/demo-a) outlet 으로
+# asset-state(MinIO)를 남긴다 → consumer demo-b 가 그걸 wait_assets
+# 센서로 폴링한다 (itemflow 모델, 트리거 아님).
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: demo-a
+  labels: { owner: items }
+spec:
+  dag:
+    interval: "@hourly"
+    start_date: "2026-05-18"
+    catchup: false
+    retries: 0
+    timezone: Asia/Seoul
+  tasks:
+    - name: extract
+      image: python:3.12-slim
+      cpu: "100m"
+      memory: "128Mi"
+      cmds:
+        - python3
+        - -c
+        - |
+          import json, hashlib, datetime
+          rows = [{"id": i, "v": (i * 7) % 13} for i in range(100)]
+          digest = hashlib.sha256(json.dumps(rows, sort_keys=True).encode()).hexdigest()[:12]
+          print("[demo-a/extract] ts=%s rows=%d checksum=%s"
+                % (datetime.datetime.utcnow().isoformat(), len(rows), digest))
+  relation: |
+    extract

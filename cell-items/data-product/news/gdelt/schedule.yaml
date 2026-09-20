@@ -1,0 +1,52 @@
+# GDELT DOC 2.0 artlist collector — KOSPI · NASDAQ 공용 교차검증 입력
+# (TASK-3 §1.3). 15분 cron, timespan=1H 로 풀어 매 run 4× overlap, transform.py
+# 가 url 기준 dedupe. data-platform-creds 로 MinIO·Polaris·S3A 자격 주입.
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: news-gdelt
+  labels:
+    owner: items
+spec:
+  dag:
+    interval: "@daily"
+    start_date: "2026-05-23"
+    catchup: false
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: collect_and_transform
+      image: registry.lab.i-tems.com/items-data-product-news-gdelt:main
+      cmds: ["/app/run.sh"]
+      cpu: "500m"
+      memory: "1Gi"
+      envFrom:
+        - data-platform-creds
+      env_vars:
+        ICEBERG_CATALOG: "polaris"
+        ICEBERG_NAMESPACE: "news"
+        ICEBERG_TABLE: "gdelt_raw"
+        GDELT_TIMESPAN: "1H"
+        GDELT_MAXRECORDS: "250"
+        # 시장별 쿼리. sourcelang/sourcecountry 모디파이어로 노이즈 감축.
+        # name 은 spec 식별자, market 은 raw.source_meta.market 으로 박혀
+        # 후속 normalize 단계에서 시장 라우팅에 쓰인다.
+        GDELT_QUERIES: |
+          [
+            {"name": "kospi_kr",
+             "query": "(KOSPI OR \"코스피\" OR \"한국증시\")",
+             "sourcelang": "Korean",
+             "market": "KOSPI"},
+            {"name": "kospi_en",
+             "query": "(KOSPI OR \"Korea stock\" OR \"Seoul stock\")",
+             "sourcelang": "English",
+             "market": "KOSPI"},
+            {"name": "nasdaq_en",
+             "query": "(NASDAQ OR \"Nasdaq Composite\")",
+             "sourcelang": "English",
+             "sourcecountry": "US",
+             "market": "NASDAQ"}
+          ]
+  relation: |
+    collect_and_transform

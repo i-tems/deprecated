@@ -1,0 +1,32 @@
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: news-bokjiro
+  labels:
+    owner: ness
+spec:
+  dag:
+    interval: "@daily"
+    start_date: "2026-06-03"
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: collect_and_transform
+      image: registry.lab.i-tems.com/infra-data-product-news-bokjiro:main
+      cmds: ["/app/run.sh", "--ds", "{{ ds if ds is defined else '' }}"]
+      cpu: "500m"
+      memory: "1Gi"
+      # data-platform-creds: MinIO/Polaris/S3A · hive-caller-creds: hub bus
+      # data-go-kr-creds: DATA_GO_KR_API_KEY (data.go.kr serviceKey, 공용)
+      envFrom:
+        - data-platform-creds
+        - hive-caller-creds
+        - data-go-kr-creds
+      env_vars:
+        ICEBERG_NAMESPACE: "news"
+        ICEBERG_TABLE: "bokjiro"
+        HUB_CELL_ID: "infra"
+        HUB_PRINCIPAL_ID: "data-product/news-bokjiro"
+  relation: |
+    collect_and_transform

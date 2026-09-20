@@ -1,0 +1,31 @@
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: metrics-ui-terminal
+  labels:
+    owner: items
+spec:
+  dag:
+    interval: "0 1 * * *"
+    start_date: "2026-06-06"
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: collect_and_transform
+      image: registry.lab.i-tems.com/infra-data-product-metrics-ui-terminal:main
+      cmds: ["/app/run.sh"]
+      cpu: "500m"
+      memory: "2Gi"
+      # data-platform-creds: Polaris + MinIO(S3) + Iceberg S3 자격.
+      envFrom:
+        - data-platform-creds
+      env_vars:
+        ICEBERG_NAMESPACE: "metrics"
+        HUB_CELL_ID: "infra"
+        # Langfuse 자격 — ai-usage 와 동일 (lab 평문 표준, cell.json langfuse 블록).
+        LANGFUSE_HOST: "https://langfuse.lab.i-tems.com"
+        LANGFUSE_PUBLIC_KEY: "pk-lf-a83cd815-b84b-4bd5-9432-2b2b13cb915d"
+        LANGFUSE_SECRET_KEY: "sk-lf-3286f1a5-4976-4e0e-a94b-8b8f528c90a2"
+  relation: |
+    collect_and_transform

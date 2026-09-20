@@ -1,0 +1,34 @@
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: signal-harvest
+  labels:
+    owner: items
+spec:
+  dag:
+    interval: "@daily"
+    start_date: "2026-06-19"
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    # Hub 위임 패턴 — 이 task 는 claude 를 직접 띄우지 않는다 (signal-triage 동일).
+    # harvest.py 가 대상 cell(HARVEST_CELLS, 기본 infra)마다 harvest cycle Issue 를
+    # 생성하고, 이후 처리는 hub agent-loop → worker pod → /harvesting-signals skill.
+    # cadence: system·external 모두 매일(harvest.py 가 매 실행에서 두 모드 발행).
+    # sessions 모드는 find_claude_sessions.py 픽스(INFRA-SIGNAL-2552) 후 추가.
+    - name: trigger
+      image: registry.lab.i-tems.com/infra-ai-signal-harvest:main
+      cmds: ["/app/run.sh"]
+      cpu: "100m"
+      memory: "128Mi"
+      # hive-caller-creds: HUB_URL + HUB_INTERNAL_TOKEN
+      # (harvest.py 가 INTERNAL_TOKEN 으로 caller JWT mint 후 cell.list/issue.list/
+      # issue.create 호출용).
+      envFrom:
+        - hive-caller-creds
+      # 대상 cell 확장 시 HARVEST_CELLS 만 바꾼다 (예: "infra,items").
+      # env_vars:
+      #   HARVEST_CELLS: "infra"
+  relation: |
+    trigger

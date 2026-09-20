@@ -1,0 +1,32 @@
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: metrics-harness
+  labels:
+    owner: items
+spec:
+  dag:
+    # bootstrap(00:00)·knowledge(01:00) 이후. transform 이 테이블을 자립 생성하므로
+    # 순서 의존은 안전망일 뿐 강제 아님.
+    interval: "0 2 * * *"
+    start_date: "2026-06-06"
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: collect_and_transform
+      image: registry.lab.i-tems.com/infra-data-product-metrics-harness:main
+      cmds: ["/app/run.sh"]
+      cpu: "500m"
+      memory: "2Gi"
+      # - data-platform-creds: Polaris + MinIO(S3) + Iceberg S3 자격.
+      # - airflow-gitsync: read-only Gitea 자격(GITSYNC_USERNAME/PASSWORD) — 미러 clone.
+      envFrom:
+        - data-platform-creds
+        - airflow-gitsync
+      env_vars:
+        ICEBERG_NAMESPACE: "metrics"
+        HUB_CELL_ID: "infra"
+        HARNESS_REPOS: "i-tems/hive i-tems/cell-infra"
+  relation: |
+    collect_and_transform

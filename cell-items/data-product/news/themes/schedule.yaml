@@ -1,0 +1,38 @@
+# Themes — accept cluster → 주간 (market, SIC division) 테마.
+# - 입력: polaris.news.clusters where route='accept' (dt 범위 = 이전 주 7일)
+# - 출력: polaris.news.themes (overwritePartitions for week_start)
+#
+# `@weekly` (월요일 02:00 KST) — 이전 주 완주 뒤 주 단위 최종화. 일일 누적은
+# overwritePartitions 로 원리적으로 가능하나 H2 "주단위 입증" 게이트라 weekly
+# 총괄로 고정. backfill 은 THEMES_WEEK_START env 로.
+#
+# SEC submissions API (CIK → SIC + ticker) 호출에 EDGAR_USER_AGENT 가 필수.
+# news/edgar 와 동일 키를 재사용 (data-platform-creds Secret).
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: news-themes
+  labels:
+    owner: items
+spec:
+  dag:
+    interval: "0 2 * * 1"    # 매주 월 02:00 KST = 일요일 17:00 UTC
+    start_date: "2026-05-24"
+    catchup: false
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: themes
+      image: registry.lab.i-tems.com/items-data-product-news-themes:main
+      cmds: ["/app/run.sh"]
+      cpu: "1"
+      memory: "2Gi"
+      envFrom:
+        - data-platform-creds
+      env_vars:
+        EDGAR_USER_AGENT: "cell-items news-themes dahuin000@gmail.com"
+        # THEMES_WEEK_START 비워두면 "이전 ISO 주". backfill 은 schedule.run 으로
+        # THEMES_WEEK_START 를 주별 덮어써 호출.
+  relation: |
+    themes

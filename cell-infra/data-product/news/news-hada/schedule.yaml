@@ -1,0 +1,34 @@
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: news-hada
+  labels:
+    owner: items
+spec:
+  dag:
+    interval: "@daily"
+    start_date: "2026-05-20"
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: collect_and_transform
+      image: registry.lab.i-tems.com/infra-data-product-news-news-hada:main
+      cmds: ["/app/run.sh"]
+      cpu: "500m"
+      memory: "1Gi"
+      # 공유 인프라 자격:
+      # - data-platform-creds: MinIO root + Polaris + S3A (collect/transform/publish 공통)
+      # - hive-caller-creds: HUB_URL + HUB_INTERNAL_TOKEN (publish 의 itemspy.bus
+      #   가 caller_token mint 후 bus.publish 호출용)
+      envFrom:
+        - data-platform-creds
+        - hive-caller-creds
+      env_vars:
+        ICEBERG_NAMESPACE: "news"
+        ICEBERG_TABLE: "news_hada"
+        # itemspy.bus 의 publisher cell scope (X-Cell-Id 헤더).
+        HUB_CELL_ID: "infra"
+        HUB_PRINCIPAL_ID: "data-product/news-hada"
+  relation: |
+    collect_and_transform

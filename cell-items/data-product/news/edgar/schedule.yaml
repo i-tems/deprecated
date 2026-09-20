@@ -1,0 +1,36 @@
+# SEC EDGAR getcurrent Atom collector (NASDAQ 1차/규제 원본). TASK-3 §2.1.
+# */10 cron, declared User-Agent 필수 (이름·이메일 포함). 거래소(NASDAQ) 필터링은
+# normalize 슬라이스에서 submissions API 캐시로 적용.
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: news-edgar
+  labels:
+    owner: items
+spec:
+  dag:
+    interval: "@daily"
+    start_date: "2026-05-24"
+    catchup: false
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: collect_and_transform
+      image: registry.lab.i-tems.com/items-data-product-news-edgar:main
+      cmds: ["/app/run.sh"]
+      cpu: "500m"
+      memory: "1Gi"
+      envFrom:
+        - data-platform-creds
+      env_vars:
+        ICEBERG_CATALOG: "polaris"
+        ICEBERG_NAMESPACE: "news"
+        ICEBERG_TABLE: "edgar_raw"
+        # SEC 공정접근 정책: declared UA (이름·이메일 포함) 필수, ≤10 req/s 글로벌.
+        # owner 승인 (EVENT-261): dahuin000@gmail.com 사용.
+        EDGAR_USER_AGENT: "cell-items news-collector dahuin000@gmail.com"
+        EDGAR_FORMS: "8-K,10-Q,10-K"
+        EDGAR_COUNT: "40"
+  relation: |
+    collect_and_transform

@@ -1,0 +1,28 @@
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: metrics-lifecycle
+  labels:
+    owner: items
+spec:
+  dag:
+    interval: "0 1 * * *"
+    start_date: "2026-06-06"
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: collect_and_transform
+      image: registry.lab.i-tems.com/infra-data-product-metrics-lifecycle:main
+      cmds: ["/app/run.sh"]
+      cpu: "500m"
+      memory: "2Gi"
+      envFrom:
+        - data-platform-creds
+        - hive-caller-creds
+      env_vars:
+        ICEBERG_NAMESPACE: "metrics"
+        HUB_CELL_ID: "infra"
+        HUB_PRINCIPAL_ID: "data-product/metrics-lifecycle"
+  relation: |
+    collect_and_transform

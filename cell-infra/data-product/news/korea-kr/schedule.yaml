@@ -1,0 +1,39 @@
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: news-korea-kr
+  labels:
+    owner: items
+spec:
+  dag:
+    interval: "@daily"
+    start_date: "2026-05-21"
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: collect_and_transform
+      image: registry.lab.i-tems.com/infra-data-product-news-korea-kr:main
+      # manual trigger 에 --logical-date 가 빠지면 `ds` 가 undefined.
+      # `is defined` 가드로 빈 문자열을 넘기면 run.sh→collect.py 의
+      # `args.ds or today_kst()` fallback 이 KST 오늘로 채운다.
+      cmds: ["/app/run.sh", "--ds", "{{ ds if ds is defined else '' }}"]
+      cpu: "500m"
+      memory: "1Gi"
+      # 공유 인프라 자격:
+      # - data-platform-creds: MinIO root + Polaris + S3A (collect/transform/publish 공통)
+      # - hive-caller-creds: HUB_URL + HUB_INTERNAL_TOKEN (publish 의 itemspy.bus
+      #   가 caller_token mint 후 bus.publish 호출용)
+      # - korea-kr-creds: KOREA_KR_API_KEY (data.go.kr 인증키, secret 별도 생성 필요)
+      envFrom:
+        - data-platform-creds
+        - hive-caller-creds
+        - korea-kr-creds
+      env_vars:
+        ICEBERG_NAMESPACE: "news"
+        ICEBERG_TABLE: "korea_kr"
+        # itemspy.bus 의 publisher cell scope (X-Cell-Id 헤더).
+        HUB_CELL_ID: "infra"
+        HUB_PRINCIPAL_ID: "data-product/news-korea-kr"
+  relation: |
+    collect_and_transform

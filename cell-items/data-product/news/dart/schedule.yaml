@@ -1,0 +1,35 @@
+# DART OpenAPI 공시 목록 collector — KOSPI 1차/규제 원본. TASK-3 §1.1 S-KR-1.
+# */10 cron. DART_CRTFC_KEY 가 비면 collect.py 가 graceful exit 0 (no-op).
+# owner 가 data-platform-creds Secret 의 DART_CRTFC_KEY 키에 인증키 주입 시
+# 다음 cron 부터 자동 가동.
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: news-dart
+  labels:
+    owner: items
+spec:
+  dag:
+    interval: "@daily"
+    start_date: "2026-05-24"
+    catchup: false
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: collect_and_transform
+      image: registry.lab.i-tems.com/items-data-product-news-dart:main
+      cmds: ["/app/run.sh"]
+      cpu: "500m"
+      memory: "1Gi"
+      envFrom:
+        - data-platform-creds
+      env_vars:
+        ICEBERG_CATALOG: "polaris"
+        ICEBERG_NAMESPACE: "news"
+        ICEBERG_TABLE: "dart_raw"
+        DART_LOOKBACK_DAYS: "1"
+        # DART_CRTFC_KEY 는 envFrom 의 data-platform-creds Secret 에 owner 가 주입.
+        # 미주입 상태에서도 collect.py 가 graceful no-op (exit 0) 으로 빠진다.
+  relation: |
+    collect_and_transform

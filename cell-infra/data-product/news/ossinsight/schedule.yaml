@@ -1,0 +1,39 @@
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: news-ossinsight
+  labels:
+    owner: items
+spec:
+  dag:
+    interval: "0 0 * * *"
+    start_date: "2026-05-23"
+    # 재시도는 collect.py in-process(지수 backoff, 최대 ~60s)로 일원화한다 —
+    # DAG 레벨 재시도는 끈다(파드 재기동 비용·중복 로그·동일 파드명 3중복 제거).
+    # 짧은 blip 은 collect 가 자가복구, 끝내 실패하면 그대로 1회 실패시켜 알린다.
+    # 지속 장애(예: 외부 API 멀티데이 다운)는 어떤 재시도로도 못 막으므로 hard-fail 유지.
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: collect_and_transform
+      image: registry.lab.i-tems.com/infra-data-product-news-ossinsight:main
+      cmds: ["/app/run.sh"]
+      cpu: "500m"
+      memory: "1Gi"
+      # 공유 인프라 자격:
+      # - data-platform-creds: MinIO root + Polaris + S3A (collect/transform/publish 공통)
+      # - hive-caller-creds: HUB_URL + HUB_INTERNAL_TOKEN (publish 의 itemspy.bus
+      #   가 caller_token mint 후 bus.publish 호출용)
+      # ossinsight 는 공개 API (api.ossinsight.io) — 별도 secret 불필요.
+      envFrom:
+        - data-platform-creds
+        - hive-caller-creds
+      env_vars:
+        ICEBERG_NAMESPACE: "news"
+        ICEBERG_TABLE: "ossinsight"
+        # itemspy.bus 의 publisher cell scope (X-Cell-Id 헤더).
+        HUB_CELL_ID: "infra"
+        HUB_PRINCIPAL_ID: "data-product/news-ossinsight"
+  relation: |
+    collect_and_transform

@@ -1,0 +1,39 @@
+# GlobeNewswire RSS collector — NASDAQ 보도자료 와이어. TASK-3 §2.1 S-US-2.
+# */5 cron. body=description, fact_status="announced" 등급 (normalize 단계에서
+# EDGAR 교차확인 시 "confirmed" 로 격상).
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: news-globenewswire
+  labels:
+    owner: items
+spec:
+  dag:
+    interval: "@daily"
+    start_date: "2026-05-24"
+    catchup: false
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: collect_and_transform
+      image: registry.lab.i-tems.com/items-data-product-news-globenewswire:main
+      cmds: ["/app/run.sh"]
+      cpu: "500m"
+      memory: "1Gi"
+      envFrom:
+        - data-platform-creds
+      env_vars:
+        ICEBERG_CATALOG: "polaris"
+        ICEBERG_NAMESPACE: "news"
+        ICEBERG_TABLE: "globenewswire_raw"
+        GNW_USER_AGENT: "cell-items news-collector dahuin000@gmail.com"
+        # 상장사 보도자료 메인 피드. 산업·지역별 추가 피드가 필요하면 list 에 추가.
+        GNW_FEEDS: |
+          [
+            {"name": "public_companies",
+             "url": "https://www.globenewswire.com/RssFeed/orgclass/1/feedTitle/GlobeNewswire+-+Public+Companies",
+             "market": "NASDAQ"}
+          ]
+  relation: |
+    collect_and_transform

@@ -1,0 +1,34 @@
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: metrics-human-attention
+  labels:
+    owner: items
+spec:
+  dag:
+    # bootstrap(00:00) 이후. transform 이 테이블을 자립 생성하므로 순서 의존은
+    # 안전망일 뿐 강제 아님.
+    interval: "0 1 * * *"
+    start_date: "2026-06-06"
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: collect_and_transform
+      image: registry.lab.i-tems.com/infra-data-product-metrics-human-attention:main
+      cmds: ["/app/run.sh"]
+      cpu: "500m"
+      # Spark local 모드 — driver JVM 이 in-process executor 까지 들고 돈다.
+      memory: "2Gi"
+      # - data-platform-creds: Polaris + MinIO(S3) + Iceberg S3 자격.
+      # - hive-caller-creds: HUB_URL + HUB_INTERNAL_TOKEN (capability 호출용
+      #   caller_token mint).
+      envFrom:
+        - data-platform-creds
+        - hive-caller-creds
+      env_vars:
+        ICEBERG_NAMESPACE: "metrics"
+        HUB_CELL_ID: "infra"
+        HUB_PRINCIPAL_ID: "data-product/metrics-human-attention"
+  relation: |
+    collect_and_transform

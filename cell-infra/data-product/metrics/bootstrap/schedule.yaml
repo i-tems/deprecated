@@ -1,0 +1,28 @@
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: metrics-bootstrap
+  labels:
+    owner: items
+spec:
+  dag:
+    interval: "0 0 * * *"
+    start_date: "2026-06-05"
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: create_tables
+      image: registry.lab.i-tems.com/infra-data-product-metrics-bootstrap:main
+      cmds: ["/app/run.sh"]
+      cpu: "500m"
+      # Spark local 모드 — driver JVM 이 in-process executor 까지 들고 돈다.
+      memory: "2Gi"
+      # data-platform-creds: Polaris(REST catalog) + MinIO(S3) + Iceberg S3 자격.
+      envFrom:
+        - data-platform-creds
+      env_vars:
+        ICEBERG_NAMESPACE: "metrics"
+        HUB_CELL_ID: "infra"
+  relation: |
+    create_tables

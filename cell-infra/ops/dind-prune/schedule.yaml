@@ -1,0 +1,56 @@
+# gitea-actions DinD 빌드 캐시 정기 prune (INFRA-ISSUE-180).
+#
+# 왜: CI(build-apps)가 빌드한 docker 이미지가 각 act-runner 의 dind sidecar
+#   (/var/lib/docker)에 정리 주체 없이 누적된다 (러너 3개에 ~104G 까지 쌓인
+#   사례). 노드 containerd 캐시(kubelet image-GC)와 별개 누적 지점이라 별도
+#   정리가 필요하다.
+#
+# 방식: task pod(airflow ns, SA airflow-worker)가 gitea-actions 의 각 runner
+#   pod 에 kubectl exec → dind 컨테이너에서 docker prune. RBAC 는
+#   gitops everything `artifacts/gitea-actions/manifests/dind-prune-rbac.yaml`
+#   (airflow-worker → gitea-actions pods/exec). 진행 중 빌드 보호: 러너에
+#   running 컨테이너가 있으면 그 러너는 건너뛴다. 01:00 KST = CI 저트래픽 구간.
+apiVersion: meta.i-tems.com/v1
+kind: Schedule
+metadata:
+  name: dind-prune
+  labels:
+    owner: items
+spec:
+  dag:
+    interval: "0 1 * * *"
+    start_date: "2026-05-31"
+    retries: 0
+    maxActiveRuns: 1
+    timezone: "Asia/Seoul"
+  tasks:
+    - name: prune
+      image: alpine/k8s:1.31.2
+      cmds:
+        - /bin/bash
+        - -c
+        - |
+          set -uo pipefail
+          NS=gitea-actions
+          echo "== dind-prune start =="
+          pods=$(kubectl -n "$NS" get pods -l app=actions-act-runner \
+                 -o jsonpath='{.items[*].metadata.name}')
+          echo "runners: ${pods:-<none>}"
+          rc=0
+          for pod in $pods; do
+            active=$(kubectl -n "$NS" exec "$pod" -c dind -- \
+                     docker ps -q 2>/dev/null | grep -c . || true)
+            if [ "${active:-0}" -ne 0 ]; then
+              echo "skip $pod (active: $active running container(s))"
+              continue
+            fi
+            echo "prune $pod"
+            kubectl -n "$NS" exec "$pod" -c dind -- docker system prune -af  || rc=1
+            kubectl -n "$NS" exec "$pod" -c dind -- docker builder prune -af || rc=1
+          done
+          echo "== dind-prune done (rc=$rc) =="
+          exit $rc
+      cpu: "100m"
+      memory: "128Mi"
+  relation: |
+    prune
