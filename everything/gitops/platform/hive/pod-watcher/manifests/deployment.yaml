@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hive-pod-watcher
+  namespace: hive
+  labels:
+    app: hive-pod-watcher
+spec:
+  replicas: 0
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: hive-pod-watcher
+  template:
+    metadata:
+      labels:
+        app: hive-pod-watcher
+    spec:
+      serviceAccountName: hive-pod-watcher
+      containers:
+        - name: watcher
+          image: registry.lab.i-tems.com/hive-pod-watcher:SEED
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: HUB_URL
+              value: http://hive-hub.hive.svc.cluster.local:8000
+            - name: EMITTER
+              value: hive-pod-watcher
+            - name: WATCHER_CELL_ID
+              value: infra
+            - name: LOG_LEVEL
+              value: INFO
+            - name: HUB_INTERNAL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hive-hub
+                  key: HUB_INTERNAL_TOKEN
+          resources:
+            requests: { cpu: 20m, memory: 64Mi }
+            limits:   { cpu: 200m, memory: 256Mi }

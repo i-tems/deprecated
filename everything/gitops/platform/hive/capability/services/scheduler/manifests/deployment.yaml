@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hive-capability-scheduler
+  namespace: hive
+spec:
+  type: ClusterIP
+  selector:
+    app: hive-capability-scheduler
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hive-capability-scheduler
+  namespace: hive
+spec:
+  replicas: 0
+  strategy: { type: Recreate }
+  selector:
+    matchLabels:
+      app: hive-capability-scheduler
+  template:
+    metadata:
+      labels:
+        app: hive-capability-scheduler
+    spec:
+      containers:
+        - name: scheduler
+          image: registry.lab.i-tems.com/hive-capability-scheduler:SEED
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: hive-capability-scheduler
+          env:
+            - name: HUB_INTERNAL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hive-hub
+                  key: HUB_INTERNAL_TOKEN
+          volumeMounts:
+            - name: hive-data
+              mountPath: /var/data
+              subPath: capabilities/scheduler/data
+          readinessProbe:
+            httpGet: { path: /health, port: 8000 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health, port: 8000 }
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests: { cpu: 25m, memory: 64Mi }
+            limits:   { cpu: 200m, memory: 256Mi }
+      volumes:
+        - name: hive-data
+          persistentVolumeClaim: { claimName: hive-data }

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hive-ui
+  namespace: hive
+  labels:
+    app: hive-ui
+spec:
+  type: ClusterIP
+  selector:
+    app: hive-ui
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP

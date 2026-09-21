@@ -1,0 +1,43 @@
+# hive-caller-creds Secret 을 사용하는 ns 마다 Application 1개 생성.
+# 각 Application 은 같은 source path(secret/) 를 destination ns 만 바꿔서 sync.
+#
+# 사용 ns 추가는 elements 에 한 줄 추가 — Secret 자체는 1군데
+# (secret/secret.yaml) 만 갱신하면 모든 ns 에 자동 반영. data-platform-secret
+# 패턴과 동일.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: hive-caller-creds
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+          # airflow: meta Schedule task pod 가 도는 ns. cell-items
+          # data-product/signal Schedule 이 envFrom 으로 참조.
+          - namespace: airflow
+          # lens: AI 생성 대시보드 앱. caller_token 으로 query.sql 호출.
+          - namespace: lens
+  template:
+    metadata:
+      name: 'hive-caller-creds-{{ .namespace }}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/i-tems/everything.git
+        targetRevision: main
+        path: gitops/platform/hive-caller-creds/secret
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ .namespace }}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true

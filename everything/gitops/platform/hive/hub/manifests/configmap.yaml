@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hive-hub
+  namespace: hive
+data:
+  # 다른 capability service URLs — 각자 자체 namespace 라 cross-ns FQDN 사용.
+  GOOGLE_URL: http://hive-capability-google.hive.svc.cluster.local:8000
+  # google 서비스가 calendar 외 sheets prefix 도 담당 (default 는 calendar 뿐).
+  GOOGLE_PREFIXES: calendar,sheets
+  SLACK_URL: http://hive-capability-slack.hive.svc.cluster.local:8000
+  SCHEDULER_URL: http://hive-capability-scheduler.hive.svc.cluster.local:8000
+  CONTAINER_URL: http://hive-capability-container.hive.svc.cluster.local:8000
+  QUERY_URL: http://hive-capability-query.hive.svc.cluster.local:8000
+  WEB_URL: http://hive-capability-web.hive.svc.cluster.local:8000
+
+  CONSOLE_BASE_URL: https://hive.tunnel.i-tems.com
+  SLACK_INBOX_TYPES: signal.emitted
+
+  # 로그인 가능 이메일 / 관리자 이메일 (콤마 구분). NFS 파일 대신 ConfigMap이 정본.
+  AUTH_WHITELIST_EMAILS: dahuin000@gmail.com,agan397@gmail.com,jinukim.ml@gmail.com,cosician.woo@gmail.com,rakkoon23@gmail.com,thkdev0519@gmail.com,han93211@gmail.com
+  AUTH_ADMIN_EMAILS: dahuin000@gmail.com
+  USER_SETTINGS_PATH: /data/user_settings.json
+  # 덱(Deck) per-user read-state — user_settings 와 동일 PVC(/data) 영속.
+  VIEW_STATE_PATH: /data/view_state.json

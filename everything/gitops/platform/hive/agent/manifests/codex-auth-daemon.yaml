@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hive-codex-auth-daemon
+  namespace: hive
+  labels:
+    app: hive-codex-auth-daemon
+spec:
+  replicas: 0
+  # 단일 refresh 권한 — 두 replica 가 동시에 refresh 하면 그 자체로 rotation 경합 →
+  # reuse 탐지. Recreate 로 절대 2개가 안 겹치게 한다.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: hive-codex-auth-daemon
+  template:
+    metadata:
+      labels:
+        app: hive-codex-auth-daemon
+    spec:
+      serviceAccountName: hive-agent-loop
+      containers:
+        - name: daemon
+          image: registry.lab.i-tems.com/hive-agent:SEED
+          imagePullPolicy: IfNotPresent
+          command: ["python3", "-m", "app.codex_auth_daemon"]
+          env:
+            # codex 가 ~/.codex 를 데몬 home 으로 보지 않도록 HOME 은 두되, 데몬은
+            # CODEX_HOME 을 명시 주입(코드 기본값 /data/shared/.codex-daemon)한다.
+            - name: HOME
+              value: /data/shared
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            requests: { cpu: 10m, memory: 64Mi }
+            limits:   { cpu: 200m, memory: 256Mi }
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: hive-data

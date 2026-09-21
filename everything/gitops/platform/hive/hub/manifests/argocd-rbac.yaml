@@ -1,0 +1,34 @@
+# Hub가 cell의 deployment.app_register / app_unregister capability에서 ArgoCD
+# Application(CR)과 repository secret을 직접 CRUD 하기 위한 cross-namespace RBAC.
+#
+# Hub SA(hive-hub)에 argocd 네임스페이스의 applications.argoproj.io 와 secrets
+# 권한을 부여한다. cell이 이 Role의 권한을 직접 받는 게 아니라, hub가 capability
+# 안에서 cell 권한을 검증한 뒤 hub의 권한으로 apply 한다.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: hive-hub-argocd
+  namespace: argocd
+rules:
+  - apiGroups: ["argoproj.io"]
+    resources: ["applications", "applicationsets", "appprojects"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # github-everything secret도 같은 ns에 있어 같은 rule로 read 가능.
+  # hub의 git_ops가 cells/ 트리 commit 시 사용.
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: hive-hub-argocd
+  namespace: argocd
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: hive-hub-argocd
+subjects:
+  - kind: ServiceAccount
+    name: hive-hub
+    namespace: hive

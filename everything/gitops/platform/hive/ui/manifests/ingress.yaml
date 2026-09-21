@@ -1,0 +1,45 @@
+# Hive 콘솔 정식 접근 = hive.tunnel.i-tems.com (Cloudflare Tunnel + Access
+# 직원 게이트, 엣지에서 인증). 브라우저↔UI 는 same-origin 이고 nginx 가
+# /api·/container 를 in-cluster 로 프록시하므로 터미널/SSE 외부에서도 동작.
+# 앱 자체 Google 로그인(whitelist)은 그대로 — Access 와 이중(심층방어).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hive-ui
+  namespace: hive
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: hive.tunnel.i-tems.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hive-ui
+                port:
+                  number: 80
+---
+# 레거시 hive.i-tems.com → 302 → hive.tunnel.i-tems.com (middleware.yaml).
+# backend 는 redirect 라 도달하지 않지만 Ingress 규칙상 필요해 동일 서비스 지정.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hive-ui-legacy-redirect
+  namespace: hive
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: hive-hive-ui-redirect-tunnel@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: hive.i-tems.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hive-ui
+                port:
+                  number: 80

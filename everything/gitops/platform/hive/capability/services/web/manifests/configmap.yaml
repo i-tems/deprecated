@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hive-capability-web
+  namespace: hive
+data:
+  # 원본 저장 위치 — hive-data PVC(RWX)의 shared 서브트리. 워커도 같은 경로를 읽는다.
+  WEB_CACHE_DIR: /data/shared/web-cache
+  WEB_CACHE_TTL_DAYS: "7"
+  WEB_MAX_BYTES: "16777216"
+  HTTP_TIMEOUT_S: "25"
+  WEB_MAX_REDIRECTS: "5"

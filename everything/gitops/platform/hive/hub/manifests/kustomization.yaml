@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# 각 리소스의 metadata.namespace를 그대로 사용 (rbac.yaml은 argocd ns).
+resources:
+  - secret.yaml
+  - secret-cell-tokens.yaml
+  - secret-hive-repo.yaml
+  - configmap.yaml
+  - serviceaccount.yaml
+  - builder-rbac.yaml
+  - argocd-rbac.yaml
+  - deployment.yaml
+  - ingress.yaml
+  - podmonitor.yaml
+images:
+  - name: registry.lab.i-tems.com/hive-hub
+    newTag: '1e3823f'

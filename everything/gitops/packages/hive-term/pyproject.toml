@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hive-term"
+# placeholder — CI(build-pypi)가 사내 PyPI 최신 정수 버전 +1 로 sed 치환 후 빌드.
+version = "0"
+description = "네이티브 터미널에서 hive sandbox 에 붙는 CLI. 브라우저 xterm.js 드로어 대신 로컬 터미널로 sandbox.ws WebSocket 에 attach (pod 공유 tmux 세션). Cloudflare Access + console JWT 인증."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{name = "i-tems"}]
+# 의존성 0 — stdlib(socket/ssl)로 WebSocket 직접 구현. 단일 파일 src/hive_term/
+# __init__.py 를 그대로 `python3` 로 실행해도 동작(off-network 파일 전달용).
+dependencies = []
+
+[project.scripts]
+hive-term = "hive_term:main"
+
+[project.urls]
+Source = "https://github.com/i-tems/everything/tree/main/gitops/packages/hive-term"
+
+[tool.setuptools.packages.find]
+where = ["src"]

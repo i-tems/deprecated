@@ -1,0 +1,125 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hive-hub
+  namespace: hive
+  labels:
+    app: hive-hub
+spec:
+  type: ClusterIP
+  selector:
+    app: hive-hub
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hive-data
+  namespace: hive
+spec:
+  accessModes: ["ReadWriteMany"]
+  storageClassName: nfs
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hive-hub
+  namespace: hive
+  labels:
+    app: hive-hub
+spec:
+  replicas: 0
+  # 무중단 롤아웃 (INFRA-ISSUE-284): 새 pod Ready 후 구 pod 종료 → 배포 다운 0.
+  # 롤아웃 순간 ~수초 2-pod 공존이 안전해진 근거 — entity 쓰기 전부 per-entity
+  # optimistic CAS(cross-pod lost-update 방지), worker heartbeat SQL 공유 저장,
+  # wake_bus miss 는 self-heal(worker long-poll DB 재조회 + SSE keepalive). replicas=1
+  # 유지(steady-state 단일 pod); replicas>1 정상가동은 별도 후속(SSE cross-process bus).
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: hive-hub
+  template:
+    metadata:
+      labels:
+        app: hive-hub
+    spec:
+      serviceAccountName: hive-hub
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      # lame-duck drain: RollingUpdate 에서 새 pod 가 트래픽을 받는 동안 구 pod 는
+      # preStop(endpoint 전파 대기) → SIGTERM → uvicorn graceful drain 으로 in-flight
+      # 를 마무리하고 내려간다 (무중단). grace 20 = preStop(5)+drain(10) 커버
+      # (INFRA-ISSUE-280: uvicorn --timeout-graceful-shutdown=10 으로 SIGKILL 까지 안 감).
+      terminationGracePeriodSeconds: 20
+      containers:
+        - name: hub
+          image: registry.lab.i-tems.com/hive-hub:SEED
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: HIVE_REPO_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hive-repo-token
+                  key: GITHUB_TOKEN
+          envFrom:
+            - configMapRef:
+                name: hive-hub
+            - secretRef:
+                name: hive-hub
+            - secretRef:
+                name: hive-hub-db
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          lifecycle:
+            # service endpoint 제거 후 kube-proxy iptables propagation 대기.
+            # 15→5 (INFRA-ISSUE-280): 단일-replica 라 preStop 진입 즉시 endpoint 0 =
+            # 그 순간부터 신규 요청 전부 실패 → preStop 은 in-flight 보호가 아니라
+            # 다운 연장. kube-proxy 전파분(~5s)만 남기고 단축.
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 5"]
+          # 프로브 완화: 단일 replica 라 burst 부하(Deck list_all, INFRA-ISSUE-266)
+          # 로 /health 가 잠깐 느려져도 endpoint 제거(502)·kill(재시작) 안 되게.
+          # 근본(폴링 throttle)은 INFRA-ISSUE-266. (INFRA-ISSUE-273)
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 8
+            failureThreshold: 4
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            # 30→6 원복 (~3min): 읽기 핸들러 threadpool 오프로드(#637·#638)로 list 버스트
+            # 의 transient starvation 이 사라져 더는 완화가 필요없다. 남은 위험은 *영구* hang
+            # (MCP ASGITransport 쓰기 경로 데드락, 별도 Issue)이며, 이건 tight liveness 로
+            # 자동 재시작 복구하는 게 옳다.
+            failureThreshold: 6
+          resources:
+            requests: { cpu: 200m, memory: 128Mi }
+            limits:   { cpu: 1500m, memory: 2Gi }
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: hive-data

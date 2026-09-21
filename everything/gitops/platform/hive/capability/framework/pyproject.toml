@@ -1,0 +1,11 @@
+[project]
+name = "capability-framework"
+version = "0.1.0"
+description = "Capability 서버 베이스 라이브러리"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "pydantic>=2.0",
+    "uuid-utils>=0.9",
+]

@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hive-git-relay
+  namespace: hive
+  labels:
+    app: hive-git-relay
+spec:
+  type: ClusterIP
+  selector:
+    app: hive-git-relay
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hive-git-relay
+  namespace: hive
+  labels:
+    app: hive-git-relay
+spec:
+  # 2 replica + RollingUpdate(maxUnavailable:0) = 자기 롤아웃에도 무중단. hub 와
+  # 독립 생명주기라 hub 롤아웃 공백이 webhook 을 못 떨군다 (INFRA-ISSUE-259 핵심).
+  replicas: 0
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: hive-git-relay
+  template:
+    metadata:
+      labels:
+        app: hive-git-relay
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+      containers:
+        - name: relay
+          image: registry.lab.i-tems.com/hive-git-relay:SEED
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            # hub 와 동일 Secret(hive-hub) 재사용 — 별도 시크릿·로테이션 분기 없음.
+            - name: HUB_CELL_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: hive-hub
+                  key: HUB_CELL_WEBHOOK_SECRET
+            - name: HUB_GITEA_ADMIN_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hive-hub
+                  key: HUB_GITEA_ADMIN_TOKEN
+            - name: HUB_GITEA_INTERNAL_URL
+              value: http://gitea-http.gitea.svc:3000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 3
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits:   { cpu: 200m, memory: 64Mi }

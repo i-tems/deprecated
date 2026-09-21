@@ -1,0 +1,50 @@
+# Hub의 build_runner가 cell-isolated kaniko Job을 hive 네임스페이스에 생성·조회·로그
+# 읽기 위한 RBAC. hive-hub SA에 직접 부여하지 않고 별도 Role을 묶어 권한 변경 추적이
+# 명확하도록 분리.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: hive-hub-builder
+  namespace: hive
+rules:
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["create", "get", "list", "watch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get"]
+  # deployment.apply / deploy_watcher 가 hive-cell-tokens secret 에서 cell PAT 을
+  # 읽어야 함. 한 secret 에 모든 cell 토큰이 키 단위로 들어 있어 secret 단위 read 만
+  # 부여한다 (hub 코드 안에서 cell 권한을 검증해야 cross-cell 누출 X).
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+    resourceNames: ["hive-cell-tokens"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: hive-hub-builder
+  namespace: hive
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: hive-hub-builder
+subjects:
+  - kind: ServiceAccount
+    name: hive-hub
+    namespace: hive
+---
+# kaniko Job이 사용하는 SA. cell-isolated Job pod이 다른 cell의 secret/리소스에 접근
+# 못 하도록 별도로 분리. 권한 0 (어떤 K8s API도 호출 안 함). 단, hive-cell-tokens
+# secret과 registry-docker-config secret을 volume/envFrom으로 마운트할 수 있는 건
+# pod spec 자체의 권한이지 SA 권한이 아니다.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hive-hub-builder
+  namespace: hive
+automountServiceAccountToken: false

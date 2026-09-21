@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hive-capability-container
+  namespace: hive
+data:
+  CELL_ID: default
+  SANDBOX_NAMESPACE: hive
+  # agent worker 와 동일 이미지 — claude-code, node, python3, git 포함.
+  # init container 가 cell repo 를 /work/cell 로 clone 한 뒤 메인 셸이 그 경로에서 시작.
+  SANDBOX_DEFAULT_IMAGE: registry.lab.i-tems.com/hive-agent:main
+  # PVC(=worker 의 hive-data) 를 /data + /shared(subPath=shared) 양쪽에 마운트해
+  # claude 인증·세션·specs 를 worker 와 공유. 비우면 PVC 마운트 생략.
+  SANDBOX_HOME_PVC: hive-data
+  SANDBOX_HOME_SUBPATH: shared
+  # cell.repo_url 조회용 hub 엔드포인트 — sandbox.create 시 console JWT 를 forward.
+  HUB_URL: http://hive-hub.hive.svc.cluster.local:8000
+  # cell 별 GITHUB_TOKEN 이 들어 있는 secret (worker 와 동일).
+  SANDBOX_CELL_TOKEN_SECRET: hive-cell-tokens
+  DEFAULT_TTL_HOURS: "2"
+  MAX_TTL_HOURS: "24"
+  DEFAULT_CPUS: "1"
+  DEFAULT_MEMORY_MB: "1024"
+  REAPER_INTERVAL: "60"

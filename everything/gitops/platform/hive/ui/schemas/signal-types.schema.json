@@ -1,0 +1,329 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hive/.claude/schemas/signal-types.schema.json",
+  "title": "Signal Emit Body",
+  "description": "Single source of truth for Signal type catalog and per-type sub-fields. Consumed by backend (signal.emit validator), frontend (Signals.tsx renderer), agent-loop (auto-emit mapping), and capability.describe. Spec mirror: .claude/specs/model/signals_model.md.",
+  "x-personal-hive": {
+    "version": "1.0.0",
+    "spec_mirror": ".claude/specs/model/signals_model.md",
+    "consumers": [
+      "backend: signal.emit Pydantic validator",
+      "frontend: ui/src/pages/Signals.tsx renderer lookup",
+      "agent-loop: auto-emit mapping (§7.4)",
+      "capability.describe: AI-facing schema"
+    ]
+  },
+
+  "type": "object",
+  "required": ["type", "detail"],
+  "properties": {
+    "type": { "$ref": "#/$defs/TypeEnum" },
+    "severity": { "$ref": "#/$defs/SeverityEnum" },
+    "impact": { "$ref": "#/$defs/ImpactEnum" },
+    "title": {
+      "type": ["string", "null"],
+      "description": "Logical field. One-line self-contained summary: target + symptom + impact. Recommended ≤120 chars. Nullable for catastrophic auto-emit paths (§7.4)."
+    },
+    "origin": { "$ref": "#/$defs/origin" },
+    "subject": { "$ref": "#/$defs/subject" },
+    "detail": { "$ref": "#/$defs/detail_envelope" }
+  },
+
+  "allOf": [
+    { "if": { "properties": { "type": { "const": "capability.insufficient" } } },
+      "then": { "$ref": "#/$defs/by_type/capability.insufficient" } },
+    { "if": { "properties": { "type": { "const": "capability.failed" } } },
+      "then": { "$ref": "#/$defs/by_type/capability.failed" } },
+    { "if": { "properties": { "type": { "const": "capability.unauthorized" } } },
+      "then": { "$ref": "#/$defs/by_type/capability.unauthorized" } },
+    { "if": { "properties": { "type": { "const": "improvement.harness" } } },
+      "then": { "$ref": "#/$defs/by_type/improvement.harness" } },
+    { "if": { "properties": { "type": { "const": "opportunity.detected" } } },
+      "then": { "$ref": "#/$defs/by_type/opportunity.detected" } },
+    { "if": { "properties": { "type": { "const": "observation.notable" } } },
+      "then": { "$ref": "#/$defs/by_type/observation.notable" } },
+    { "if": { "properties": { "type": { "const": "infra.pod_failed" } } },
+      "then": { "$ref": "#/$defs/by_type/infra.pod_failed" } }
+  ],
+
+  "$defs": {
+    "TypeEnum": {
+      "description": "Signal type catalog. See signals_model.md §2.",
+      "enum": [
+        "capability.insufficient",
+        "capability.failed",
+        "capability.unauthorized",
+        "improvement.harness",
+        "opportunity.detected",
+        "observation.notable",
+        "infra.pod_failed"
+      ]
+    },
+
+    "SeverityEnum": {
+      "description": "Legacy compatibility severity levels. New Signal triage should prefer impact.",
+      "enum": ["info", "warn", "error", "critical"],
+      "default": "info"
+    },
+
+    "ImpactEnum": {
+      "description": "Signal impact: how strongly the signal can change decisions, outcomes, priority, or safety boundaries. This is not scope.",
+      "enum": ["minor", "moderate", "major", "decisive"],
+      "default": "minor"
+    },
+
+    "StatusEnum": {
+      "description": "Signal lifecycle states. See signals_model.md §4.",
+      "enum": ["emitted", "kept", "processing", "resolved", "dismissed"]
+    },
+
+    "Record": {
+      "type": "object",
+      "description": "Persisted Signal record (append-only `signals` table). Superset of emit body with system-assigned fields.",
+      "required": ["signal_id", "type", "ts_emitted", "severity", "status"],
+      "properties": {
+        "signal_id": { "type": "string", "format": "uuid", "description": "UUIDv7" },
+        "type": { "$ref": "#/$defs/TypeEnum" },
+        "ts_emitted": { "type": "string", "format": "date-time" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "severity": { "$ref": "#/$defs/SeverityEnum" },
+        "impact": { "$ref": "#/$defs/ImpactEnum" },
+        "status": { "$ref": "#/$defs/StatusEnum" },
+        "title": { "type": ["string", "null"] },
+        "origin": { "$ref": "#/$defs/origin" },
+        "subject": { "$ref": "#/$defs/subject" },
+        "detail": { "$ref": "#/$defs/detail_envelope" },
+        "goal_id": { "type": ["string", "null"], "description": "Processing Goal link. Set when status=processing and a Goal was created to handle this Signal." },
+        "task_id": { "type": ["string", "null"], "description": "Processing Task link. Set when status=processing and a Task was created to handle this Signal." },
+        "deleted": { "type": "boolean" },
+        "deleted_at": { "type": ["string", "null"], "format": "date-time" },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["ts", "status"],
+            "properties": {
+              "ts": { "type": "string", "format": "date-time" },
+              "status": { "type": "string" },
+              "by": { "type": ["string", "null"] },
+              "note": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "source_context": { "deprecated": true, "type": "object", "description": "Backward-compat dual-write target. Do not populate on new emits." },
+        "payload": { "deprecated": true, "type": "object", "description": "Backward-compat dual-write target. Do not populate on new emits." },
+        "reason": { "deprecated": true, "type": ["string", "null"], "description": "Backward-compat dual-write of detail.message." }
+      }
+    },
+
+    "origin": {
+      "type": "object",
+      "required": ["emitter"],
+      "properties": {
+        "emitter": { "type": "string" },
+        "phase": { "type": ["string", "null"] },
+        "session_id": { "type": ["string", "null"] },
+        "hive_id": { "type": ["string", "null"] }
+      }
+    },
+
+    "subject": {
+      "type": "object",
+      "description": "Entity-id pointers. Distinct from logical field 'target' which is a natural-language identifier.",
+      "properties": {
+        "task_id": { "type": ["string", "null"] },
+        "goal_id": { "type": ["string", "null"] },
+        "product_id": { "type": ["string", "null"] },
+        "capability_id": { "type": ["string", "null"] },
+        "track_id": { "type": ["string", "null"], "description": "Track name (e.g., 'agentic-value'). Tracks are personal Master Plan units stored in data/cells/{cell}/tracks/." }
+      }
+    },
+
+    "SourceItem": {
+      "type": "object",
+      "description": "Single external citation. See signals_model.md §7.2 외부 자료 인용 표준.",
+      "required": ["source"],
+      "properties": {
+        "source": { "type": "string", "description": "Human-readable citation (저자/기관/제목/연도 자유 결합)." },
+        "ref": { "type": "string", "description": "Locator: URL / arXiv:ID / file path / ISBN / signal_id 등. 자료 종류는 ref 형식으로 추론하며 별도 kind 필드를 두지 않는다." },
+        "published": { "type": "string", "description": "YYYY 또는 YYYY-MM-DD." }
+      },
+      "additionalProperties": false
+    },
+
+    "EvidenceEnvelope": {
+      "type": "object",
+      "description": "Backing data for opportunity/improvement/observation signals. Always use 'sources' array (length ≥1) for external citations — single sources also.",
+      "properties": {
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/SourceItem" }
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "detail_envelope": {
+      "type": "object",
+      "required": ["message", "raw"],
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "Logical field 'summary'. Multi-line markdown allowed. First line should be a one-line summary (used as list preview). Manual emits should use English headings with Korean body: ## Observation, ## Implication, and optional ## Action Idea. Type-specific facts and structured evidence belong in detail.raw."
+        },
+        "raw": {
+          "type": "object",
+          "description": "Holds logical 'target', logical 'metadata', and per-type sub-fields (see #/$defs/by_type/*).",
+          "required": ["target"],
+          "properties": {
+            "target": {
+              "type": "string",
+              "description": "Logical field. Natural-language identifier of the affected rule/file/area/capability."
+            },
+            "metadata": {
+              "type": "object",
+              "description": "Logical field. Free-form auxiliary info that doesn't fit other keys.",
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "by_type": {
+      "capability.insufficient": {
+        "x-default-severity": "warn",
+        "x-default-impact": "major",
+        "properties": {
+          "detail": {
+            "properties": {
+              "raw": {
+                "required": ["target", "blocked_action"],
+                "properties": {
+                  "blocked_action": { "type": "string", "description": "What the AI could not perform." },
+                  "capability_hint": { "type": "string", "description": "One-sentence candidate capability that would automate this. Auto-populated by agent-loop needs_human emits." }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "capability.failed": {
+        "x-default-severity": "error",
+        "x-default-impact": "major",
+        "properties": {
+          "detail": {
+            "properties": {
+              "raw": {
+                "required": ["target", "failure_reason"],
+                "properties": {
+                  "failure_reason": { "type": "string", "description": "Subtype of failure (e.g., timeout, rate_limit, validation, harness, execution, state_transition)." }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "capability.unauthorized": {
+        "x-default-severity": "warn",
+        "x-default-impact": "moderate",
+        "properties": {
+          "detail": {
+            "properties": {
+              "raw": {
+                "required": ["target", "resource"],
+                "properties": {
+                  "resource": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "improvement.harness": {
+        "x-default-severity": "warn",
+        "x-default-impact": "major",
+        "properties": {
+          "detail": {
+            "properties": {
+              "raw": {
+                "required": ["target", "evidence"],
+                "properties": {
+                  "evidence": { "$ref": "#/$defs/EvidenceEnvelope" }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "opportunity.detected": {
+        "x-default-severity": "info",
+        "x-default-impact": "moderate",
+        "properties": {
+          "detail": {
+            "properties": {
+              "raw": {
+                "required": ["target", "evidence"],
+                "properties": {
+                  "evidence": { "$ref": "#/$defs/EvidenceEnvelope" }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "observation.notable": {
+        "x-default-severity": "info",
+        "x-default-impact": "minor",
+        "properties": {
+          "detail": {
+            "properties": {
+              "raw": {
+                "required": ["target"],
+                "properties": {
+                  "pattern_signature": { "type": "string", "description": "Optional. Stable identifier for the observed pattern. Use only when pattern de-dup matters (recurring observations)." },
+                  "evidence": { "$ref": "#/$defs/EvidenceEnvelope", "description": "Optional. Use when the observation cites external sources (reports, papers, internal docs, conversations)." }
+                }
+              }
+            }
+          }
+        }
+      },
+
+      "infra.pod_failed": {
+        "x-default-severity": "error",
+        "x-default-impact": "moderate",
+        "properties": {
+          "detail": {
+            "properties": {
+              "raw": {
+                "required": ["target", "exit_code", "reason"],
+                "properties": {
+                  "exit_code": { "type": "integer", "description": "Container 종료 코드 (≠0)." },
+                  "reason": { "type": "string", "description": "K8s가 보고한 종료 사유 (Error, OOMKilled, ContainerStatusUnknown 등)." },
+                  "namespace": { "type": "string" },
+                  "pod": { "type": "string" },
+                  "container": { "type": "string" },
+                  "restart_count": { "type": "integer", "description": "container restartCount 스냅샷." },
+                  "owner_kind": { "type": "string", "description": "Pod 의 controller kind (Deployment/StatefulSet/DaemonSet/ReplicaSet 등). Job/CronJob 은 watcher 가 사전 필터링." },
+                  "owner_name": { "type": "string" },
+                  "node": { "type": "string" },
+                  "started_at": { "type": "string", "format": "date-time" },
+                  "finished_at": { "type": "string", "format": "date-time" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

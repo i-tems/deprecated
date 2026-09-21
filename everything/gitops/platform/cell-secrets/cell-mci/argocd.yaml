@@ -1,0 +1,31 @@
+# cell-mci ns 의 앱 secret 프로비저닝. root-app glob
+# (gitops/platform/*/argocd.yaml — ArgoCD 의 * 는 / 를 넘는다)이 자동 발견.
+# meta-apps ApplicationSet 은 같은 ns 의 Deployment/Service/Ingress 만
+# 관리 → 객체가 겹치지 않아 ServerSideApply 필드 충돌 없음.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cell-secrets-cell-mci
+  namespace: argocd
+  annotations:
+    # 앱(meta-apps, wave 10)보다 먼저 Secret 생성. 늦어도 pod 가
+    # CreateContainerConfigError 후 Secret 등장 시 자동 회복(eventual).
+    argocd.argoproj.io/sync-wave: "5"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/i-tems/everything.git
+    targetRevision: main
+    path: gitops/platform/cell-secrets/cell-mci/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cell-mci
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

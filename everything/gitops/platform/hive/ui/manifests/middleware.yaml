@@ -1,0 +1,13 @@
+# 레거시 hive.i-tems.com → 직원 게이트 hive.tunnel.i-tems.com 리다이렉트.
+# 302(permanent=false): 롤백 안전(브라우저가 영구 캐시 안 함). 안정화 후
+# 필요하면 permanent=true(301)로 승격. path·query 보존((.*)).
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: hive-ui-redirect-tunnel
+  namespace: hive
+spec:
+  redirectRegex:
+    regex: "^https?://hive\\.i-tems\\.com/(.*)"
+    replacement: "https://hive.tunnel.i-tems.com/${1}"
+    permanent: false

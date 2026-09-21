@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hive-capability-query
+  namespace: hive
+data:
+  # Kyuubi REST endpoint — kyuubi ns 의 service.
+  KYUUBI_REST_URL: http://kyuubi.kyuubi.svc.cluster.local:10099
+  DEFAULT_CATALOG: polaris
+  DEFAULT_LIMIT: "1000"
+  MAX_LIMIT: "10000"
+  POLL_INTERVAL_S: "0.5"
+  POLL_TIMEOUT_S: "60"
+  HTTP_TIMEOUT_S: "30"

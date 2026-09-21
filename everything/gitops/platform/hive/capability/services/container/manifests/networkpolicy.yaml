@@ -1,0 +1,72 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: hive-capability-container
+  namespace: hive
+spec:
+  podSelector:
+    matchLabels:
+      app: hive-capability-container
+  policyTypes:
+    - Ingress
+  ingress:
+    # hub: 일반 API 프록시
+    - from:
+        - podSelector:
+            matchLabels:
+              app: hive-hub
+      ports:
+        - port: 8000
+          protocol: TCP
+    # ui(nginx): /container/sandbox.ws WebSocket 직통 프록시
+    - from:
+        - podSelector:
+            matchLabels:
+              app: hive-ui
+      ports:
+        - port: 8000
+          protocol: TCP
+---
+# Sandbox pod 격리: 같은 ns의 hive 내부 서비스로의 lateral move 방지.
+# WS 터미널은 k8s API exec 채널을 사용하므로 sandbox 자체에 ingress 불필요.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: hive-sandbox-isolation
+  namespace: hive
+spec:
+  podSelector:
+    matchLabels:
+      hive.i-tems.com/role: sandbox
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress: []
+  egress:
+    # hive-hub 만 예외 허용: sandbox 안 claude 가 hive capability 를 쓰려면
+    # hive-hub 에 도달해야 한다 (.mcp.json → http://hive-hub..:8000/mcp/,
+    # commit 74b62886). hub 만 콕 집어 허용 — mysql·타 capability 서비스·
+    # 다른 sandbox 로의 lateral move 는 계속 차단(격리 의도 보존). hub 는
+    # auth/cell 미들웨어로 console JWT 를 검증하므로 신뢰 경계 유지.
+    - to:
+        - podSelector:
+            matchLabels:
+              app: hive-hub
+      ports:
+        - port: 8000
+          protocol: TCP
+    # hive ns 외부 (kube-dns, 다른 ns) 허용
+    - to:
+        - namespaceSelector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: NotIn
+                values: ["hive"]
+    # 클러스터 외부 인터넷 허용 (apt/pip 등)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16

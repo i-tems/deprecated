@@ -1,0 +1,52 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hive-hub
+  namespace: hive
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: hive-hub.lab.i-tems.com
+      http:
+        paths:
+          - path: /mcp
+            pathType: Prefix
+            backend:
+              service:
+                name: hive-hub
+                port:
+                  number: 8000
+---
+# 외부 노출 — GitHub canonical repo 의 push webhook 이 hub 로 도달해 Gitea
+# mirror-sync 를 즉시 트리거하기 위함. /cell.github_push 단일 경로만 노출하고
+# pathType=Exact 로 다른 hub endpoint 는 외부에서 접근 불가.
+# host 가 *.i-tems.com (lab. 없음) 이라 piano 등과 동일하게 public ingress.
+# HMAC 검증은 핸들러 안에서 (HUB_CELL_WEBHOOK_SECRET).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hive-hub-cell-webhook
+  namespace: hive
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: hub-webhook.i-tems.com
+      http:
+        paths:
+          # /cell.github_push 는 hub 밖 항상-떠있는 relay(hive-git-relay)로 분기 —
+          # hub 롤아웃 공백에 webhook 이 503 으로 유실되던 것 차단 (INFRA-ISSUE-259).
+          # 나머지 경로(/git.github_push 등)는 hub 유지.
+          - path: /cell.github_push
+            pathType: Exact
+            backend:
+              service:
+                name: hive-git-relay
+                port:
+                  number: 8000
+          - path: /git.github_push
+            pathType: Exact
+            backend:
+              service:
+                name: hive-hub
+                port:
+                  number: 8000

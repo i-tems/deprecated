@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hive-capability-query
+  namespace: hive
+  labels:
+    app: hive-capability-query
+spec:
+  type: ClusterIP
+  selector:
+    app: hive-capability-query
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hive-capability-query
+  namespace: hive
+  labels:
+    app: hive-capability-query
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: hive-capability-query
+  template:
+    metadata:
+      labels:
+        app: hive-capability-query
+    spec:
+      serviceAccountName: hive-capability-query
+      containers:
+        - name: query
+          image: registry.lab.i-tems.com/hive-capability-query:SEED
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: hive-capability-query
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits:   { cpu: 500m, memory: 512Mi }

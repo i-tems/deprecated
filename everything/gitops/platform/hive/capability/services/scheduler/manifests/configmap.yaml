@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hive-capability-scheduler
+  namespace: hive
+data:
+  CELL_ID: default
+  TZ: Asia/Seoul
+  HUB_URL: http://hive-hub.hive.svc.cluster.local:8000

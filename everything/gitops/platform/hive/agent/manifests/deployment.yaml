@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hive-agent-loop
+  namespace: hive
+  labels:
+    app: hive-agent-loop
+spec:
+  type: ClusterIP
+  selector:
+    app: hive-agent-loop
+  ports:
+    - name: http
+      port: 8001
+      targetPort: 8001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hive-agent-loop
+  namespace: hive
+  labels:
+    app: hive-agent-loop
+spec:
+  replicas: 0
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: hive-agent-loop
+  template:
+    metadata:
+      labels:
+        app: hive-agent-loop
+    spec:
+      serviceAccountName: hive-agent-loop
+      containers:
+        - name: loop
+          image: registry.lab.i-tems.com/hive-agent:SEED
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8001
+              name: http
+            - containerPort: 8002
+              name: metrics
+          env:
+            - name: HUB_URL
+              value: http://hive-hub.hive.svc.cluster.local:8000
+            # worker 백엔드 = sdk (ClaudeSDKClient, Claude). codex(ChatGPT 구독,
+            # INFRA-ISSUE-256 cutover)는 codex_backend.py 에 유지 — 재전환은 이 값을 codex 로.
+            # codex→claude 자동 fallback(FallbackAgentSession)은 제거됨: codex 선택 시 단독 동작.
+            - name: AGENT_BACKEND
+              value: sdk
+            - name: AGENT_NAMESPACE
+              value: hive
+            - name: WORKER_IMAGE
+              value: registry.lab.i-tems.com/hive-agent:main
+            - name: WORKER_SERVICE_ACCOUNT
+              value: hive-agent-worker
+            - name: DATA_PVC_NAME
+              value: hive-data
+            - name: HOME
+              value: /data/shared
+            - name: HIVE_ROOT
+              value: /data
+            - name: SHARED_DIR
+              value: /data/shared
+            - name: PROJECT_DIR
+              value: /data/shared
+            - name: EXEC_CWD
+              value: /data/shared
+            - name: POLL_INTERVAL
+              value: "30"
+            - name: SPECS_ROOT
+              value: /data/shared/specs
+            - name: HUB_INTERNAL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hive-hub
+                  key: HUB_INTERNAL_TOKEN
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits:   { cpu: 500m, memory: 512Mi }
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: hive-data

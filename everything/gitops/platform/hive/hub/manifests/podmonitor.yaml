@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: hive-hub
+  namespace: hive
+  labels:
+    release: kps  # kube-prometheus-stack 의 Prometheus 가 release=kps 라벨로 ServiceMonitor/PodMonitor 검색
+spec:
+  selector:
+    matchLabels:
+      app: hive-hub
+  podMetricsEndpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hive-ui
+  namespace: hive
+  labels:
+    app: hive-ui
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: hive-ui
+  template:
+    metadata:
+      labels:
+        app: hive-ui
+    spec:
+      containers:
+        - name: hive-ui
+          image: registry.lab.i-tems.com/hive-ui:SEED
+          ports:
+            - containerPort: 80
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits:   { cpu: 200m, memory: 128Mi }
