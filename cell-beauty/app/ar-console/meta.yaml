@@ -1,0 +1,15 @@
+apiVersion: meta.i-tems.com/v1
+kind: App
+metadata:
+  name: ar-console
+spec:
+  image: registry.lab.i-tems.com/beauty-app-ar-console   # 태그는 meta 가 소스 sha 로 해석
+  port: 8080                                              # nginx-unprivileged 비-root 포트
+  domain: i-tems.com                                      # ar-console.i-tems.com
+  resources:
+    requests: { cpu: 10m, memory: 16Mi }
+    limits: { cpu: 100m, memory: 64Mi }
+  environments:
+    prd: { from: main }                                   # main 커밋 → prd 직접 자동
+  overrides:
+    prd: { replicas: 1 }
