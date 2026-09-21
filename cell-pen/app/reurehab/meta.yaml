@@ -1,0 +1,21 @@
+apiVersion: meta.i-tems.com/v1
+kind: App
+metadata:
+  name: reurehab
+spec:
+  image: registry.lab.i-tems.com/pen-app-reurehab   # 태그는 meta 가 소스 sha 로 해석
+  port: 3000
+  domain: i-tems.com                            # reurehab.i-tems.com / -dev
+  env:
+    HOSTNAME: "0.0.0.0"
+    PORT: "3000"
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { cpu: 1000m, memory: 1Gi }
+  # securityContext / automountServiceAccountToken 은 적지 않는다 —
+  # meta 가 강화 기본을 플랫폼 차원에서 강제 주입한다(작성자 권한 약화 불가).
+  environments:
+    dev: { from: main }                          # main 커밋 → dev 자동
+    prd: { promoteFrom: dev, approval: pr }       # promote 로만 prd
+  overrides:
+    prd: { replicas: 1 }
