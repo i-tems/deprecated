@@ -1,0 +1,39 @@
+{
+  "id": "trends",
+  "title": "④ 추세·효율",
+  "description": "월별 추이 · 모델 토큰 효율 · 엔티티 타입별 집계. 금액은 lab 가격(랭킹용). 비용은 task 가 거의 전부(폭주 루프 2건).",
+  "panels": [
+    {
+      "title": "월별 AI 비용 (USD)",
+      "chart": { "type": "bar", "x": "month", "y": ["cost_usd"] },
+      "sql": "SELECT substr(dt,1,7) AS month, round(sum(value),2) AS cost_usd FROM polaris.metrics.metric_fact WHERE metric='ai_usage.cost_usd' GROUP BY substr(dt,1,7) ORDER BY month"
+    },
+    {
+      "title": "월별 입력 토큰 (M)",
+      "chart": { "type": "bar", "x": "month", "y": ["tokens_in_m"] },
+      "sql": "SELECT substr(dt,1,7) AS month, round(sum(value)/1e6,1) AS tokens_in_m FROM polaris.metrics.metric_fact WHERE metric='ai_usage.tokens_in' GROUP BY substr(dt,1,7) ORDER BY month"
+    },
+    {
+      "title": "엔티티 타입별 비용 분포",
+      "chart": { "type": "pie", "label": "type", "value": "cost_usd" },
+      "sql": "SELECT dims['entity_type'] AS type, round(sum(value),2) AS cost_usd FROM polaris.metrics.metric_fact WHERE metric='ai_usage.cost_by_entity' GROUP BY dims['entity_type'] ORDER BY cost_usd DESC"
+    },
+    {
+      "title": "엔티티 타입별 trace 분포",
+      "chart": { "type": "pie", "label": "type", "value": "traces" },
+      "sql": "SELECT dims['entity_type'] AS type, sum(value) AS traces FROM polaris.metrics.metric_fact WHERE metric='ai_usage.traces_by_entity' GROUP BY dims['entity_type'] ORDER BY traces DESC"
+    },
+    {
+      "title": "모델별 토큰 효율 (입력 M·출력 M·비용)",
+      "span": true,
+      "chart": { "type": "table" },
+      "sql": "SELECT dims['model'] AS model, round(sum(CASE WHEN metric='ai_usage.tokens_in' THEN value END)/1e6,1) AS tokens_in_m, round(sum(CASE WHEN metric='ai_usage.tokens_out' THEN value END)/1e6,2) AS tokens_out_m, round(sum(CASE WHEN metric='ai_usage.cost_usd' THEN value END),2) AS cost_usd FROM polaris.metrics.metric_fact WHERE domain='ai_usage' AND metric IN ('ai_usage.tokens_in','ai_usage.tokens_out','ai_usage.cost_usd') GROUP BY dims['model'] ORDER BY cost_usd DESC"
+    },
+    {
+      "title": "엔티티 타입별 lifecycle (생성·완료·취소)",
+      "span": true,
+      "chart": { "type": "table" },
+      "sql": "SELECT dims['entity_type'] AS type, sum(CASE WHEN metric='lifecycle.created' THEN value END) AS created, sum(CASE WHEN metric='lifecycle.done' THEN value END) AS done, sum(CASE WHEN metric='lifecycle.cancelled' THEN value END) AS cancelled FROM polaris.metrics.metric_fact WHERE domain='lifecycle' GROUP BY dims['entity_type'] ORDER BY done DESC"
+    }
+  ]
+}

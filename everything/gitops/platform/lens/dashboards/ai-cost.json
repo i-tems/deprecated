@@ -1,0 +1,38 @@
+{
+  "id": "ai-cost",
+  "title": "② AI 비용·토큰 심층",
+  "description": "ai_usage 도메인 — 어디서/누가/어느 모델이 토큰을 쓰나. 금액은 lab 가격이라 절대값 아닌 랭킹으로. 기간 선택 적용.",
+  "panels": [
+    {
+      "title": "비용 일별 (USD)",
+      "chart": { "type": "line", "x": "dt", "y": ["cost_usd"] },
+      "sql": "SELECT dt, round(sum(value),2) AS cost_usd FROM polaris.metrics.metric_fact WHERE metric='ai_usage.cost_usd' AND dt >= '{{since}}' GROUP BY dt ORDER BY dt"
+    },
+    {
+      "title": "토큰 일별 (입력·출력)",
+      "chart": { "type": "line", "x": "dt", "y": ["tokens_in", "tokens_out"] },
+      "sql": "SELECT dt, sum(CASE WHEN metric='ai_usage.tokens_in' THEN value END) AS tokens_in, sum(CASE WHEN metric='ai_usage.tokens_out' THEN value END) AS tokens_out FROM polaris.metrics.metric_fact WHERE domain='ai_usage' AND dt >= '{{since}}' GROUP BY dt ORDER BY dt"
+    },
+    {
+      "title": "엔티티별 비용 TOP 15",
+      "chart": { "type": "bar", "orient": "h", "x": "entity", "y": ["cost_usd"] },
+      "sql": "SELECT dims['entity_id'] AS entity, round(sum(value),2) AS cost_usd FROM polaris.metrics.metric_fact WHERE metric='ai_usage.cost_by_entity' AND dims['entity_id'] IS NOT NULL AND dims['entity_id']<>'' AND dt >= '{{since}}' GROUP BY dims['entity_id'] ORDER BY cost_usd DESC LIMIT 15"
+    },
+    {
+      "title": "모델별 비용",
+      "chart": { "type": "bar", "orient": "h", "x": "model", "y": ["cost_usd"] },
+      "sql": "SELECT dims['model'] AS model, round(sum(value),2) AS cost_usd FROM polaris.metrics.metric_fact WHERE metric='ai_usage.cost_usd' AND dims['model'] IS NOT NULL AND dt >= '{{since}}' GROUP BY dims['model'] ORDER BY cost_usd DESC"
+    },
+    {
+      "title": "엔티티별 trace 수 TOP 15",
+      "chart": { "type": "bar", "orient": "h", "x": "entity", "y": ["traces"] },
+      "sql": "SELECT dims['entity_id'] AS entity, sum(value) AS traces FROM polaris.metrics.metric_fact WHERE metric='ai_usage.traces_by_entity' AND dims['entity_id'] IS NOT NULL AND dims['entity_id']<>'' AND dt >= '{{since}}' GROUP BY dims['entity_id'] ORDER BY traces DESC LIMIT 15"
+    },
+    {
+      "title": "엔티티별 비용 상세 (TOP 30)",
+      "span": true,
+      "chart": { "type": "table" },
+      "sql": "SELECT dims['entity_id'] AS entity, dims['entity_type'] AS type, round(sum(value),2) AS cost_usd FROM polaris.metrics.metric_fact WHERE metric='ai_usage.cost_by_entity' AND dims['entity_id'] IS NOT NULL AND dims['entity_id']<>'' AND dt >= '{{since}}' GROUP BY dims['entity_id'], dims['entity_type'] ORDER BY cost_usd DESC LIMIT 30"
+    }
+  ]
+}

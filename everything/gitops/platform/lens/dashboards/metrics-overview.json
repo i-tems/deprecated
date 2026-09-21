@@ -1,0 +1,49 @@
+{
+  "id": "metrics-overview",
+  "title": "① 개요 — hive metrics",
+  "description": "polaris.metrics (Iceberg, Airflow daily) 핵심 지표 한눈. AI 비용·사람 주의력·lifecycle·지식·터미널. 심층은 ②AI 비용 / ③활동 / ④추세 대시보드. 기간 선택 적용.",
+  "panels": [
+    {
+      "title": "도메인별 지표 수",
+      "span": true,
+      "chart": { "type": "stat", "label": "domain", "value": "metrics", "unit": "지표" },
+      "sql": "SELECT domain, count(DISTINCT metric) AS metrics FROM polaris.metrics.metric_fact GROUP BY domain ORDER BY domain"
+    },
+    {
+      "title": "AI 비용 일별 (USD, lab 가격)",
+      "chart": { "type": "line", "x": "dt", "y": ["cost_usd"] },
+      "sql": "SELECT dt, round(sum(value),2) AS cost_usd FROM polaris.metrics.metric_fact WHERE metric='ai_usage.cost_usd' AND dt >= '{{since}}' GROUP BY dt ORDER BY dt"
+    },
+    {
+      "title": "엔티티별 AI 비용 TOP 12 (상대, lab 가격)",
+      "chart": { "type": "bar", "orient": "h", "x": "entity", "y": ["cost_usd"] },
+      "sql": "SELECT dims['entity_id'] AS entity, round(sum(value),2) AS cost_usd FROM polaris.metrics.metric_fact WHERE metric='ai_usage.cost_by_entity' AND dims['entity_id'] IS NOT NULL AND dims['entity_id']<>'' AND dt >= '{{since}}' GROUP BY dims['entity_id'] ORDER BY cost_usd DESC LIMIT 12"
+    },
+    {
+      "title": "사람 주의력 일별 (핸드오프·응답·inbox·로그인)",
+      "chart": { "type": "line", "x": "dt", "y": ["handoff", "reply", "inbox", "login"] },
+      "sql": "SELECT dt, sum(CASE WHEN metric='human_attention.handoff_count' THEN value END) AS handoff, sum(CASE WHEN metric='human_attention.human_reply_count' THEN value END) AS reply, sum(CASE WHEN metric='human_attention.inbox_count' THEN value END) AS inbox, sum(CASE WHEN metric='human_attention.console_login_count' THEN value END) AS login FROM polaris.metrics.metric_fact WHERE domain='human_attention' AND dt >= '{{since}}' GROUP BY dt ORDER BY dt"
+    },
+    {
+      "title": "핸드오프 응답 지연 일별 (초, p50·p90)",
+      "chart": { "type": "line", "x": "dt", "y": ["p50_s", "p90_s"] },
+      "sql": "SELECT dt, round(avg(CASE WHEN metric='human_attention.handoff_latency_p50_s' THEN value END),0) AS p50_s, round(avg(CASE WHEN metric='human_attention.handoff_latency_p90_s' THEN value END),0) AS p90_s FROM polaris.metrics.metric_fact WHERE metric IN ('human_attention.handoff_latency_p50_s','human_attention.handoff_latency_p90_s') AND dt >= '{{since}}' GROUP BY dt ORDER BY dt"
+    },
+    {
+      "title": "엔티티 lifecycle 일별 (생성·완료·취소)",
+      "chart": { "type": "line", "x": "dt", "y": ["created", "done", "cancelled"] },
+      "sql": "SELECT dt, sum(CASE WHEN metric='lifecycle.created' THEN value END) AS created, sum(CASE WHEN metric='lifecycle.done' THEN value END) AS done, sum(CASE WHEN metric='lifecycle.cancelled' THEN value END) AS cancelled FROM polaris.metrics.metric_fact WHERE domain='lifecycle' AND dt >= '{{since}}' GROUP BY dt ORDER BY dt"
+    },
+    {
+      "title": "지식 일별 (문서 생성·갱신·churn line)",
+      "chart": { "type": "line", "x": "dt", "y": ["created", "updated", "churn_lines"] },
+      "sql": "SELECT dt, sum(CASE WHEN metric='knowledge.doc_created' THEN value END) AS created, sum(CASE WHEN metric='knowledge.doc_updated' THEN value END) AS updated, sum(CASE WHEN metric='knowledge.churn_lines' THEN value END) AS churn_lines FROM polaris.metrics.metric_fact WHERE domain='knowledge' AND dt >= '{{since}}' GROUP BY dt ORDER BY dt"
+    },
+    {
+      "title": "터미널(수동 셸) 사용자별 — ui_terminal",
+      "span": true,
+      "chart": { "type": "table" },
+      "sql": "SELECT dims['user'] AS user, sum(CASE WHEN metric='ui_terminal.sessions' THEN value END) AS sessions, sum(CASE WHEN metric='ui_terminal.turns' THEN value END) AS turns, sum(CASE WHEN metric='ui_terminal.tokens_in' THEN value END) AS tokens_in, sum(CASE WHEN metric='ui_terminal.tokens_out' THEN value END) AS tokens_out, round(sum(CASE WHEN metric='ui_terminal.active_seconds' THEN value END),0) AS active_s FROM polaris.metrics.metric_fact WHERE domain='ui_terminal' AND dt >= '{{since}}' GROUP BY dims['user'] ORDER BY turns DESC"
+    }
+  ]
+}

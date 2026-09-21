@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>lens</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<style>
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.5 -apple-system,Segoe UI,Roboto,'Apple SD Gothic Neo',sans-serif;background:#0f1115;color:#e6e8ee}
+header{padding:14px 22px;border-bottom:1px solid #242a36;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header h1{font-size:18px;margin:0;letter-spacing:.5px}
+header .tag{color:#8b93a7;font-size:12.5px}
+.controls{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+select,button{background:#171a21;color:#e6e8ee;border:1px solid #2b3344;border-radius:7px;padding:6px 10px;font-size:13px}
+button{cursor:pointer}
+button:hover{border-color:#4f8cff}
+.updated{color:#6f7892;font-size:11.5px}
+.wrap{max-width:1240px;margin:0 auto;padding:22px 20px 64px}
+.desc{color:#8b93a7;font-size:13px;margin:0 0 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(440px,1fr));gap:16px}
+.panel{background:#141821;border:1px solid #242a36;border-radius:11px;padding:14px 16px}
+.panel.span2{grid-column:1/-1}
+.panel h2{font-size:14.5px;margin:0 0 4px;border-left:3px solid #4f8cff;padding-left:9px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.panel h2 .ms{color:#6f7892;font-size:11px;font-weight:400}
+.panel .sql{color:#6f7892;font-size:11px;font-family:ui-monospace,monospace;margin:0 0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.panel .sql.open{white-space:pre-wrap;word-break:break-all}
+.chart{width:100%;height:280px}
+.err{color:#ff7b7b;font-size:12.5px;font-family:ui-monospace,monospace;white-space:pre-wrap}
+.loading{display:flex;align-items:center;gap:9px;color:#6f7892;font-size:12.5px;height:280px;justify-content:center}
+.panel .loading{height:140px}
+.spinner{width:15px;height:15px;border:2px solid #2b3344;border-top-color:#4f8cff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.controls.busy #refresh{animation:spin .7s linear infinite}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.kpi{background:#171a21;border:1px solid #242a36;border-radius:9px;padding:12px 14px}
+.kpi .v{font-size:24px;font-weight:700}
+.kpi .l{color:#8b93a7;font-size:12px;margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:5px 9px;text-align:left;border-bottom:1px solid #1f2530;white-space:nowrap}
+th{color:#8b93a7;background:#10131a;position:sticky;top:0}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.tablebox{max-height:340px;overflow:auto;border:1px solid #1f2530;border-radius:8px}
+.foot{margin-top:30px;color:#6f7892;font-size:12px;border-top:1px solid #242a36;padding-top:14px}
+</style>
+</head>
+<body>
+<header>
+  <h1>lens</h1>
+  <span class="tag">AI 생성 대시보드 · read-only</span>
+  <div class="controls">
+    <select id="picker" title="대시보드"></select>
+    <select id="range" title="기간">
+      <option value="0">전체</option>
+      <option value="90">최근 90일</option>
+      <option value="30" selected>최근 30일</option>
+      <option value="7">최근 7일</option>
+    </select>
+    <select id="auto" title="자동 새로고침">
+      <option value="0" selected>자동 끔</option>
+      <option value="30">30초</option>
+      <option value="60">60초</option>
+      <option value="300">5분</option>
+    </select>
+    <button id="refresh" title="새로고침">↻</button>
+    <span class="updated" id="updated"></span>
+  </div>
+</header>
+<div class="wrap">
+  <p class="desc" id="desc"></p>
+  <div class="grid" id="grid"></div>
+  <div class="foot">대시보드는 spec JSON 으로 저작·재생성된다. 새 대시보드 = <code>dashboards/*.json</code> 추가. 기간 필터는 패널 SQL 의 <code>{{since}}</code> 자리표시자를 치환(opt-in).</div>
+</div>
+<script>
+const NUM = v => v === null || v === '' || isNaN(+v) ? null : +v;
+const compact = v => {
+  if (v === null) return '';
+  const a = Math.abs(v);
+  if (a >= 1e9) return (v/1e9).toFixed(1)+'B';
+  if (a >= 1e6) return (v/1e6).toFixed(1)+'M';
+  if (a >= 1e3) return (v/1e3).toFixed(1)+'k';
+  return (+v).toLocaleString();
+};
+const state = { id: null, autoTimer: null, charts: [] };
+function track(el) { const c = echarts.init(el, 'dark'); state.charts.push(c); return c; }
+
+function sinceDate() {
+  const days = +document.getElementById('range').value;
+  if (!days) return '2000-01-01';
+  return new Date(Date.now() - days*864e5).toISOString().slice(0, 10);
+}
+const applySince = sql => sql.replaceAll('{{since}}', sinceDate());
+
+async function api(path, opts) {
+  const r = await fetch(path, opts);
+  const text = await r.text();   // 본문은 한 번만 읽는다 (json()→text() 이중 read 시 stream already read)
+  if (!r.ok) {
+    let m = text;
+    try { m = JSON.parse(text).detail || text; } catch {}
+    throw new Error(m || r.status);
+  }
+  return JSON.parse(text);
+}
+const ci = (cols, name) => cols.indexOf(name);
+
+function renderChart(el, panel, data) {
+  const { columns, rows } = data;
+  const c = panel.chart, xi = ci(columns, c.x), horiz = c.orient === 'h';
+  const cats = rows.map(r => r[xi]);
+  const series = (c.y || []).map(name => {
+    const yi = ci(columns, name);
+    return { name, type: c.type === 'bar' ? 'bar' : 'line', smooth: c.type === 'line',
+             showSymbol: false, data: rows.map(r => NUM(r[yi])) };
+  });
+  const valAxis = { type: 'value', axisLabel: { color: '#8b93a7', formatter: compact }, splitLine: { lineStyle: { color: '#1f2530' } } };
+  const catAxis = { type: 'category', data: cats, inverse: horiz,
+                    axisLabel: { color: '#8b93a7', rotate: !horiz && cats.length > 12 ? 40 : 0 } };
+  // 시계열(가로축=카테고리, line/세로 bar)엔 줌 슬라이더 — 드래그·휠로 구간 확대.
+  const zoomable = !horiz && cats.length > 8;
+  track(el).setOption({
+    backgroundColor: 'transparent',
+    grid: { left: horiz ? 130 : 56, right: 18, top: 30, bottom: zoomable ? 64 : 46 },
+    tooltip: { trigger: 'axis', valueFormatter: compact },
+    legend: { show: series.length > 1, textStyle: { color: '#8b93a7' }, top: 0 },
+    dataZoom: zoomable ? [{ type: 'inside' }, { type: 'slider', height: 18, bottom: 14,
+              borderColor: '#2b3344', fillerColor: 'rgba(79,140,255,.15)',
+              textStyle: { color: '#8b93a7' } }] : undefined,
+    xAxis: horiz ? valAxis : catAxis,
+    yAxis: horiz ? catAxis : valAxis,
+    series
+  });
+}
+
+function renderPie(el, panel, data) {
+  const { columns, rows } = data;
+  const c = panel.chart, li = ci(columns, c.label), vi = ci(columns, c.value);
+  track(el).setOption({
+    backgroundColor: 'transparent',
+    tooltip: { trigger: 'item', valueFormatter: compact },
+    legend: { textStyle: { color: '#8b93a7' }, type: 'scroll', bottom: 0 },
+    series: [{
+      type: 'pie', radius: ['38%', '66%'], top: 0, bottom: 24,
+      data: rows.map(r => ({ name: r[li], value: NUM(r[vi]) })),
+      label: { color: '#c8cddb' }
+    }]
+  });
+}
+
+function renderStat(el, panel, data) {
+  const { columns, rows } = data;
+  const c = panel.chart;
+  const li = ci(columns, c.label), vi = ci(columns, c.value);
+  el.innerHTML = `<div class="cards">${rows.map(r =>
+    `<div class="kpi"><div class="v">${compact(NUM(r[vi]))}${c.unit ? ' <span style="font-size:13px;color:#8b93a7">'+c.unit+'</span>' : ''}</div><div class="l">${r[li]}</div></div>`
+  ).join('')}</div>`;
+}
+
+function renderTable(el, data) {
+  const { columns, rows } = data;
+  const numeric = columns.map((_, i) => rows.length > 0 && rows.every(r => NUM(r[i]) !== null));
+  const th = columns.map(c => `<th>${c}</th>`).join('');
+  const trs = rows.map(r => '<tr>' + r.map((v, i) =>
+    `<td class="${numeric[i] ? 'num' : ''}">${numeric[i] ? compact(NUM(v)) : (v ?? '')}</td>`).join('') + '</tr>').join('');
+  el.innerHTML = `<div class="tablebox"><table><thead><tr>${th}</tr></thead><tbody>${trs}</tbody></table></div>`;
+}
+
+async function loadPanel(panel) {
+  const type = (panel.chart || {}).type || 'table';
+  const card = document.createElement('div');
+  card.className = 'panel' + (panel.span ? ' span2' : '');
+  const ms = document.createElement('span'); ms.className = 'ms';
+  const h2 = document.createElement('h2'); h2.textContent = panel.title; h2.appendChild(ms);
+  card.appendChild(h2);
+  const sql = document.createElement('p'); sql.className = 'sql'; sql.textContent = applySince(panel.sql);
+  sql.onclick = () => sql.classList.toggle('open');
+  card.appendChild(sql);
+  const body = document.createElement('div'); card.appendChild(body);
+  body.innerHTML = '<div class="loading"><span class="spinner"></span>불러오는 중…</div>';
+  document.getElementById('grid').appendChild(card);
+  try {
+    const data = await api('/api/run', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sql: applySince(panel.sql) })
+    });
+    ms.textContent = data.ms != null ? data.ms + 'ms' : '';
+    body.innerHTML = '';
+    if (type === 'table') renderTable(body, data);
+    else if (type === 'stat') renderStat(body, panel, data);
+    else { const ch = document.createElement('div'); ch.className = 'chart'; body.appendChild(ch);
+           (type === 'pie' ? renderPie : renderChart)(ch, panel, data); }
+  } catch (e) {
+    body.innerHTML = `<div class="err">쿼리 실패: ${e.message}</div>`;
+  }
+}
+
+// 선택 대시보드·기간·자동새로고침을 URL 쿼리 + localStorage 에 기록.
+// URL = 공유 링크로 같은 뷰 재현, localStorage = 파라미터 없는 개인 북마크 폴백.
+const VIEW_KEY = 'lens.view';
+function currentView() {
+  return {
+    id: state.id,
+    range: document.getElementById('range').value,
+    auto: document.getElementById('auto').value,
+  };
+}
+function persist() {
+  const v = currentView();
+  try { localStorage.setItem(VIEW_KEY, JSON.stringify(v)); } catch {}
+  const p = new URLSearchParams();
+  if (v.id) p.set('d', v.id);
+  p.set('range', v.range);
+  p.set('auto', v.auto);
+  history.replaceState(null, '', '?' + p.toString());
+}
+function loadView() {  // URL 우선, 없으면 localStorage 폴백.
+  const u = new URLSearchParams(location.search);
+  let ls = {};
+  try { ls = JSON.parse(localStorage.getItem(VIEW_KEY)) || {}; } catch {}
+  return {
+    id: u.get('d') ?? ls.id,
+    range: u.get('range') ?? ls.range,
+    auto: u.get('auto') ?? ls.auto,
+  };
+}
+
+// 패널을 동시성 제한으로 로드 — 전 패널 동시 query.sql 은 공유 hub 를 과부하로
+// NotReady/crash 시켜 모든 패널이 502 로 떨어진다. 소수 동시(PANEL_CONCURRENCY)로 흘린다.
+const PANEL_CONCURRENCY = 2;
+async function loadPanelsLimited(panels) {
+  const queue = panels.slice();
+  const worker = async () => { while (queue.length) await loadPanel(queue.shift()); };
+  await Promise.all(Array.from({ length: Math.min(PANEL_CONCURRENCY, queue.length) }, worker));
+}
+
+async function showDashboard(id) {
+  state.id = id;
+  persist();
+  const grid = document.getElementById('grid');
+  const controls = document.querySelector('.controls');
+  state.charts.forEach(c => c.dispose());
+  state.charts = [];
+  grid.innerHTML = '';
+  controls.classList.add('busy');
+  document.getElementById('updated').textContent = '불러오는 중…';
+  try {
+    const d = await api('/api/dashboards/' + id);
+    document.getElementById('desc').textContent = d.description || '';
+    await loadPanelsLimited(d.panels || []);
+    const now = new Date().toLocaleTimeString('ko-KR', { hour12: false });
+    document.getElementById('updated').textContent = '갱신 ' + now;
+  } finally {
+    controls.classList.remove('busy');
+  }
+}
+
+function setupAuto() {
+  if (state.autoTimer) { clearInterval(state.autoTimer); state.autoTimer = null; }
+  const sec = +document.getElementById('auto').value;
+  if (sec) state.autoTimer = setInterval(() => state.id && showDashboard(state.id), sec*1000);
+  persist();
+}
+
+async function init() {
+  const { dashboards } = await api('/api/dashboards');
+  const picker = document.getElementById('picker');
+  if (!dashboards.length) { document.getElementById('desc').textContent = '대시보드가 없습니다.'; return; }
+  picker.innerHTML = dashboards.map(d => `<option value="${d.id}">${d.title}</option>`).join('');
+  picker.onchange = () => showDashboard(picker.value);
+  let rz; window.addEventListener('resize', () => {
+    clearTimeout(rz); rz = setTimeout(() => state.charts.forEach(c => c.resize()), 150);
+  });
+  document.getElementById('range').onchange = () => state.id && showDashboard(state.id);
+  document.getElementById('auto').onchange = setupAuto;
+  document.getElementById('refresh').onclick = () => state.id && showDashboard(state.id);
+  // 저장된 선택 복원 — 유효한 값만(대시보드 삭제·option 변경 시 기본값 폴백).
+  const saved = loadView();
+  const has = (sel, v) => v != null && document.querySelector(`#${sel} option[value="${v}"]`);
+  if (has('range', saved.range)) document.getElementById('range').value = saved.range;
+  if (has('auto', saved.auto)) document.getElementById('auto').value = saved.auto;
+  setupAuto();
+  const startId = dashboards.some(d => d.id === saved.id) ? saved.id : dashboards[0].id;
+  picker.value = startId;
+  showDashboard(startId);
+}
+init().catch(e => document.getElementById('desc').textContent = '초기화 실패: ' + e.message);
+</script>
+</body>
+</html>

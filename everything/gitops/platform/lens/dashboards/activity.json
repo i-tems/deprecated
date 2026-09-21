@@ -1,0 +1,33 @@
+{
+  "id": "activity",
+  "title": "③ 워커·터미널 활동",
+  "description": "worker(자동 루프 워커) + ui_terminal(사람 수동 셸) 도메인. 턴 수가 한 엔티티에 수백~수천이면 루프 신호. 기간 선택 적용.",
+  "panels": [
+    {
+      "title": "워커 턴 TOP 15 (엔티티) — 루프 신호",
+      "chart": { "type": "bar", "orient": "h", "x": "entity", "y": ["turns"] },
+      "sql": "SELECT dims['entity_id'] AS entity, sum(value) AS turns FROM polaris.metrics.metric_fact WHERE metric='worker.turns' AND dims['entity_id'] IS NOT NULL AND dims['entity_id']<>'' AND dt >= '{{since}}' GROUP BY dims['entity_id'] ORDER BY turns DESC LIMIT 15"
+    },
+    {
+      "title": "워커 입력 토큰 TOP 15 (엔티티)",
+      "chart": { "type": "bar", "orient": "h", "x": "entity", "y": ["tokens_in"] },
+      "sql": "SELECT dims['entity_id'] AS entity, sum(value) AS tokens_in FROM polaris.metrics.metric_fact WHERE metric='worker.tokens_in' AND dims['entity_id'] IS NOT NULL AND dims['entity_id']<>'' AND dt >= '{{since}}' GROUP BY dims['entity_id'] ORDER BY tokens_in DESC LIMIT 15"
+    },
+    {
+      "title": "워커 활동 일별 (턴·도구호출)",
+      "chart": { "type": "line", "x": "dt", "y": ["turns", "tool_calls"] },
+      "sql": "SELECT dt, sum(CASE WHEN metric='worker.turns' THEN value END) AS turns, sum(CASE WHEN metric='worker.tool_calls' THEN value END) AS tool_calls FROM polaris.metrics.metric_fact WHERE domain='worker' AND dt >= '{{since}}' GROUP BY dt ORDER BY dt"
+    },
+    {
+      "title": "워커 토큰 일별 (입력·출력)",
+      "chart": { "type": "line", "x": "dt", "y": ["tokens_in", "tokens_out"] },
+      "sql": "SELECT dt, sum(CASE WHEN metric='worker.tokens_in' THEN value END) AS tokens_in, sum(CASE WHEN metric='worker.tokens_out' THEN value END) AS tokens_out FROM polaris.metrics.metric_fact WHERE domain='worker' AND dt >= '{{since}}' GROUP BY dt ORDER BY dt"
+    },
+    {
+      "title": "터미널(수동 셸) 사용자별 — ui_terminal",
+      "span": true,
+      "chart": { "type": "table" },
+      "sql": "SELECT dims['user'] AS user, sum(CASE WHEN metric='ui_terminal.sessions' THEN value END) AS sessions, sum(CASE WHEN metric='ui_terminal.turns' THEN value END) AS turns, sum(CASE WHEN metric='ui_terminal.tokens_in' THEN value END) AS tokens_in, sum(CASE WHEN metric='ui_terminal.tokens_out' THEN value END) AS tokens_out, round(sum(CASE WHEN metric='ui_terminal.active_seconds' THEN value END),0) AS active_s FROM polaris.metrics.metric_fact WHERE domain='ui_terminal' AND dt >= '{{since}}' GROUP BY dims['user'] ORDER BY turns DESC"
+    }
+  ]
+}

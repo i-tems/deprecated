@@ -1,0 +1,20 @@
+# lens 접근 = lens.tunnel.i-tems.com (Cloudflare Tunnel + Access 직원 게이트,
+# 엣지에서 인증). 앱 자체 인증은 MVP 밖 — Access 가 외부 게이트. hive-ui 와 동일.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lens
+  namespace: lens
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: lens.tunnel.i-tems.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: lens
+                port:
+                  number: 80

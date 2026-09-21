@@ -1,0 +1,38 @@
+{
+  "id": "harness",
+  "title": "⑤ 하네스 (skill·rule·spec)",
+  "description": ".claude 하네스 아티팩트 — repo(공유 hive/셀)·타입별. 현재 개수는 최신 스냅샷, 활동(생성·갱신·churn)은 기간 선택 적용. 데이터=INFRA-ISSUE-272 수집기(일배치).",
+  "panels": [
+    {
+      "title": "타입별 현재 아티팩트 수",
+      "span": true,
+      "chart": { "type": "stat", "label": "type", "value": "cnt", "unit": "개" },
+      "sql": "SELECT dims['artifact_type'] AS type, sum(value) AS cnt FROM polaris.metrics.metric_fact WHERE metric='harness.artifact_count' AND dt=(SELECT max(dt) FROM polaris.metrics.metric_fact WHERE metric='harness.artifact_count') GROUP BY dims['artifact_type'] ORDER BY cnt DESC"
+    },
+    {
+      "title": "타입별 분포 (현재)",
+      "chart": { "type": "pie", "label": "type", "value": "cnt" },
+      "sql": "SELECT dims['artifact_type'] AS type, sum(value) AS cnt FROM polaris.metrics.metric_fact WHERE metric='harness.artifact_count' AND dt=(SELECT max(dt) FROM polaris.metrics.metric_fact WHERE metric='harness.artifact_count') GROUP BY dims['artifact_type'] ORDER BY cnt DESC"
+    },
+    {
+      "title": "repo×타입 현재 수",
+      "chart": { "type": "table" },
+      "sql": "SELECT dims['repo'] AS repo, dims['artifact_type'] AS type, sum(value) AS cnt FROM polaris.metrics.metric_fact WHERE metric='harness.artifact_count' AND dt=(SELECT max(dt) FROM polaris.metrics.metric_fact WHERE metric='harness.artifact_count') GROUP BY dims['repo'], dims['artifact_type'] ORDER BY cnt DESC"
+    },
+    {
+      "title": "아티팩트 수 추이 (타입별, 일)",
+      "chart": { "type": "line", "x": "dt", "y": ["skill", "spec", "rule"] },
+      "sql": "SELECT dt, sum(CASE WHEN dims['artifact_type']='skill' THEN value END) AS skill, sum(CASE WHEN dims['artifact_type']='spec' THEN value END) AS spec, sum(CASE WHEN dims['artifact_type']='rule' THEN value END) AS rule FROM polaris.metrics.metric_fact WHERE metric='harness.artifact_count' AND dt >= '{{since}}' GROUP BY dt ORDER BY dt"
+    },
+    {
+      "title": "하네스 churn 일별 (line)",
+      "chart": { "type": "line", "x": "dt", "y": ["churn"] },
+      "sql": "SELECT dt, sum(value) AS churn FROM polaris.metrics.metric_fact WHERE metric='harness.churn_lines' AND dt >= '{{since}}' GROUP BY dt ORDER BY dt"
+    },
+    {
+      "title": "하네스 생성·갱신 일별",
+      "chart": { "type": "line", "x": "dt", "y": ["created", "updated"] },
+      "sql": "SELECT dt, sum(CASE WHEN metric='harness.artifact_created' THEN value END) AS created, sum(CASE WHEN metric='harness.artifact_updated' THEN value END) AS updated FROM polaris.metrics.metric_fact WHERE metric IN ('harness.artifact_created','harness.artifact_updated') AND dt >= '{{since}}' GROUP BY dt ORDER BY dt"
+    }
+  ]
+}
