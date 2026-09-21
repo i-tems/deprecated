@@ -1,0 +1,20 @@
+apiVersion: meta.i-tems.com/v1
+kind: App
+metadata:
+  name: news-dashboard
+spec:
+  # 이미지 태그는 meta 가 소스 sha 로 해석 (gitops_app_spec §3·§4).
+  image: registry.lab.i-tems.com/items-app-news-dashboard
+  port: 8000
+  # 공개 정책: spec.domain=i-tems.com → prd 가 외부 공개 host
+  # news-dashboard.i-tems.com 로 서빙 (Cloudflare Access 게이트 없음).
+  domain: i-tems.com
+  resources:
+    requests: { cpu: 25m, memory: 96Mi }
+    limits:   { cpu: 250m, memory: 384Mi }
+  environments:
+    # 단순 read-only 서비스 — dev 게이트 불필요. main 머지 즉시 prd 자동 배포
+    # (gitops_app_spec §3 단순 운영 앱 패턴). prd host =
+    # news-dashboard.i-tems.com (공개). task 브랜치 push 시 meta 가 자동으로
+    # lab·tunnel preview 도 띄움 (§6.3).
+    prd: { from: main }
