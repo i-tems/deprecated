@@ -1,0 +1,449 @@
+{
+    "type": "kindle",
+    "total_page": 284,
+    "top_crop": 120,
+    "bottom_crop": 120,
+    "lang": "eng",
+    "groups": [
+        {
+            "start_page": 1,
+            "end_page": 2,
+            "name": "Group 0"
+        },
+        {
+            "start_page": 3,
+            "end_page": 4,
+            "name": "Group 1"
+        },
+        {
+            "start_page": 5,
+            "end_page": 6,
+            "name": "Group 2"
+        },
+        {
+            "start_page": 7,
+            "end_page": 8,
+            "name": "Group 3"
+        },
+        {
+            "start_page": 9,
+            "end_page": 12,
+            "name": "Group 4"
+        },
+        {
+            "start_page": 13,
+            "end_page": 16,
+            "name": "Group 5"
+        },
+        {
+            "start_page": 17,
+            "end_page": 18,
+            "name": "Group 6"
+        },
+        {
+            "start_page": 19,
+            "end_page": 20,
+            "name": "Group 7"
+        },
+        {
+            "start_page": 21,
+            "end_page": 22,
+            "name": "Group 8"
+        },
+        {
+            "start_page": 23,
+            "end_page": 25,
+            "name": "Group 9"
+        },
+        {
+            "start_page": 26,
+            "end_page": 27,
+            "name": "Group 10"
+        },
+        {
+            "start_page": 28,
+            "end_page": 29,
+            "name": "Group 11"
+        },
+        {
+            "start_page": 30,
+            "end_page": 31,
+            "name": "Group 12"
+        },
+        {
+            "start_page": 32,
+            "end_page": 33,
+            "name": "Group 13"
+        },
+        {
+            "start_page": 34,
+            "end_page": 35,
+            "name": "Group 14"
+        },
+        {
+            "start_page": 36,
+            "end_page": 37,
+            "name": "Group 15"
+        },
+        {
+            "start_page": 38,
+            "end_page": 39,
+            "name": "Group 16"
+        },
+        {
+            "start_page": 40,
+            "end_page": 41,
+            "name": "Group 17"
+        },
+        {
+            "start_page": 42,
+            "end_page": 45,
+            "name": "Group 18"
+        },
+        {
+            "start_page": 46,
+            "end_page": 47,
+            "name": "Group 19"
+        },
+        {
+            "start_page": 48,
+            "end_page": 49,
+            "name": "Group 20"
+        },
+        {
+            "start_page": 50,
+            "end_page": 51,
+            "name": "Group 21"
+        },
+        {
+            "start_page": 52,
+            "end_page": 53,
+            "name": "Group 22"
+        },
+        {
+            "start_page": 54,
+            "end_page": 55,
+            "name": "Group 23"
+        },
+        {
+            "start_page": 56,
+            "end_page": 58,
+            "name": "Group 24"
+        },
+        {
+            "start_page": 59,
+            "end_page": 61,
+            "name": "Group 25"
+        },
+        {
+            "start_page": 62,
+            "end_page": 63,
+            "name": "Group 26"
+        },
+        {
+            "start_page": 64,
+            "end_page": 67,
+            "name": "Group 27"
+        },
+        {
+            "start_page": 68,
+            "end_page": 69,
+            "name": "Group 28"
+        },
+        {
+            "start_page": 70,
+            "end_page": 71,
+            "name": "Group 29"
+        },
+        {
+            "start_page": 72,
+            "end_page": 73,
+            "name": "Group 30"
+        },
+        {
+            "start_page": 74,
+            "end_page": 78,
+            "name": "Group 31"
+        },
+        {
+            "start_page": 79,
+            "end_page": 80,
+            "name": "Group 32"
+        },
+        {
+            "start_page": 81,
+            "end_page": 82,
+            "name": "Group 33"
+        },
+        {
+            "start_page": 83,
+            "end_page": 84,
+            "name": "Group 34"
+        },
+        {
+            "start_page": 85,
+            "end_page": 86,
+            "name": "Group 35"
+        },
+        {
+            "start_page": 87,
+            "end_page": 88,
+            "name": "Group 36"
+        },
+        {
+            "start_page": 89,
+            "end_page": 90,
+            "name": "Group 37"
+        },
+        {
+            "start_page": 91,
+            "end_page": 92,
+            "name": "Group 38"
+        },
+        {
+            "start_page": 93,
+            "end_page": 94,
+            "name": "Group 39"
+        },
+        {
+            "start_page": 95,
+            "end_page": 96,
+            "name": "Group 40"
+        },
+        {
+            "start_page": 97,
+            "end_page": 100,
+            "name": "Group 41"
+        },
+        {
+            "start_page": 101,
+            "end_page": 102,
+            "name": "Group 42"
+        },
+        {
+            "start_page": 103,
+            "end_page": 104,
+            "name": "Group 43"
+        },
+        {
+            "start_page": 105,
+            "end_page": 106,
+            "name": "Group 44"
+        },
+        {
+            "start_page": 107,
+            "end_page": 108,
+            "name": "Group 45"
+        },
+        {
+            "start_page": 109,
+            "end_page": 110,
+            "name": "Group 46"
+        },
+        {
+            "start_page": 111,
+            "end_page": 113,
+            "name": "Group 47"
+        },
+        {
+            "start_page": 114,
+            "end_page": 115,
+            "name": "Group 48"
+        },
+        {
+            "start_page": 116,
+            "end_page": 117,
+            "name": "Group 49"
+        },
+        {
+            "start_page": 118,
+            "end_page": 119,
+            "name": "Group 50"
+        },
+        {
+            "start_page": 120,
+            "end_page": 121,
+            "name": "Group 51"
+        },
+        {
+            "start_page": 122,
+            "end_page": 123,
+            "name": "Group 52"
+        },
+        {
+            "start_page": 124,
+            "end_page": 125,
+            "name": "Group 53"
+        },
+        {
+            "start_page": 126,
+            "end_page": 127,
+            "name": "Group 54"
+        },
+        {
+            "start_page": 128,
+            "end_page": 130,
+            "name": "Group 55"
+        },
+        {
+            "start_page": 131,
+            "end_page": 133,
+            "name": "Group 56"
+        },
+        {
+            "start_page": 134,
+            "end_page": 135,
+            "name": "Group 57"
+        },
+        {
+            "start_page": 136,
+            "end_page": 137,
+            "name": "Group 58"
+        },
+        {
+            "start_page": 138,
+            "end_page": 139,
+            "name": "Group 59"
+        },
+        {
+            "start_page": 140,
+            "end_page": 144,
+            "name": "Group 60"
+        },
+        {
+            "start_page": 145,
+            "end_page": 147,
+            "name": "Group 61"
+        },
+        {
+            "start_page": 148,
+            "end_page": 150,
+            "name": "Group 62"
+        },
+        {
+            "start_page": 151,
+            "end_page": 152,
+            "name": "Group 63"
+        },
+        {
+            "start_page": 153,
+            "end_page": 154,
+            "name": "Group 64"
+        },
+        {
+            "start_page": 155,
+            "end_page": 156,
+            "name": "Group 65"
+        },
+        {
+            "start_page": 157,
+            "end_page": 158,
+            "name": "Group 66"
+        },
+        {
+            "start_page": 159,
+            "end_page": 160,
+            "name": "Group 67"
+        },
+        {
+            "start_page": 161,
+            "end_page": 162,
+            "name": "Group 68"
+        },
+        {
+            "start_page": 163,
+            "end_page": 166,
+            "name": "Group 69"
+        },
+        {
+            "start_page": 167,
+            "end_page": 168,
+            "name": "Group 70"
+        },
+        {
+            "start_page": 169,
+            "end_page": 170,
+            "name": "Group 71"
+        },
+        {
+            "start_page": 171,
+            "end_page": 173,
+            "name": "Group 72"
+        },
+        {
+            "start_page": 174,
+            "end_page": 177,
+            "name": "Group 73"
+        },
+        {
+            "start_page": 178,
+            "end_page": 179,
+            "name": "Group 74"
+        },
+        {
+            "start_page": 180,
+            "end_page": 181,
+            "name": "Group 75"
+        },
+        {
+            "start_page": 182,
+            "end_page": 183,
+            "name": "Group 76"
+        },
+        {
+            "start_page": 184,
+            "end_page": 185,
+            "name": "Group 77"
+        },
+        {
+            "start_page": 186,
+            "end_page": 187,
+            "name": "Group 78"
+        },
+        {
+            "start_page": 188,
+            "end_page": 189,
+            "name": "Group 79"
+        },
+        {
+            "start_page": 190,
+            "end_page": 191,
+            "name": "Group 80"
+        },
+        {
+            "start_page": 192,
+            "end_page": 193,
+            "name": "Group 81"
+        },
+        {
+            "start_page": 194,
+            "end_page": 195,
+            "name": "Group 82"
+        },
+        {
+            "start_page": 196,
+            "end_page": 199,
+            "name": "Group 83"
+        },
+        {
+            "start_page": 200,
+            "end_page": 201,
+            "name": "Group 84"
+        },
+        {
+            "start_page": 202,
+            "end_page": 203,
+            "name": "Group 85"
+        },
+        {
+            "start_page": 204,
+            "end_page": 205,
+            "name": "Group 86"
+        },
+        {
+            "start_page": 206,
+            "end_page": 207,
+            "name": "Group 87"
+        }
+    ]
+}

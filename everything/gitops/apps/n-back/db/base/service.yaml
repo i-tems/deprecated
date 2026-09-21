@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: n-back-db
+  labels:
+    app: n-back-db
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app: n-back-db
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+      protocol: TCP

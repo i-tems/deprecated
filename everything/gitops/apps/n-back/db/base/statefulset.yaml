@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: n-back-db
+  labels:
+    app: n-back-db
+spec:
+  serviceName: n-back-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: n-back-db
+  template:
+    metadata:
+      labels:
+        app: n-back-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16.14-alpine
+          env:
+            - name: POSTGRES_USER
+              value: nback
+            - name: POSTGRES_PASSWORD
+              value: nback_secret
+            - name: POSTGRES_DB
+              value: nback
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          ports:
+            - containerPort: 5432
+              name: postgres
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "nback", "-d", "nback"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "nback", "-d", "nback"]
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 5Gi

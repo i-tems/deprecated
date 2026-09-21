@@ -1,0 +1,122 @@
+{
+    "type": "kindle",
+    "total_page": 768,
+    "top_crop": 250,
+    "bottom_crop": 250,
+    "lang": "eng",
+    "groups": [
+        {
+            "start_page": 5,
+            "end_page": 17,
+            "name": "Preface to the Fourth Edition by Warren E. Buffett"
+        },
+        {
+            "start_page": 18,
+            "end_page": 33,
+            "name": "Introduction What This Book Expects to Accomplish"
+        },
+        {
+            "start_page": 34,
+            "end_page": 60,
+            "name": "Chapter 1 Investment versus Speculation"
+        },
+        {
+            "start_page": 61,
+            "end_page": 75,
+            "name": "Chapter 2 The Investor and Inflation"
+        },
+        {
+            "start_page": 76,
+            "end_page": 98,
+            "name": "Chapter 3 A Century of Stock-Market History"
+        },
+        {
+            "start_page": 99,
+            "end_page": 122,
+            "name": "Chapter 4 General Portfolio Policy The Defensive Investor"
+        },
+        {
+            "start_page": 123,
+            "end_page": 141,
+            "name": "Chapter 5 The Defensive Investor and Common Stocks"
+        },
+        {
+            "start_page": 142,
+            "end_page": 161,
+            "name": "Chapter 6 Portfolio Policy for the Enterprising Investor Negative Approach"
+        },
+        {
+            "start_page": 162,
+            "end_page": 190,
+            "name": "Chapter 7 Portfolio Policy for the Enterprising Investor The Positive Side"
+        },
+        {
+            "start_page": 191,
+            "end_page": 223,
+            "name": "Chapter 8 The Investor and Market Fluctuations"
+        },
+        {
+            "start_page": 224,
+            "end_page": 249,
+            "name": "Chapter 9 Investing in Investment Funds"
+        },
+        {
+            "start_page": 250,
+            "end_page": 270,
+            "name": "Chapter 10 The Investor and His Advisers"
+        },
+        {
+            "start_page": 271,
+            "end_page": 297,
+            "name": "Chapter 11 Security Analysis for the Lay Investor General Approach"
+        },
+        {
+            "start_page": 298,
+            "end_page": 314,
+            "name": "Chapter 12 Things to Consider About Per-Share Earnings"
+        },
+        {
+            "start_page": 315,
+            "end_page": 329,
+            "name": "Chapter 13 A Comparison of Four Listed Companies"
+        },
+        {
+            "start_page": 330,
+            "end_page": 354,
+            "name": "Chapter 14 Stock Selection for the Defensive Investor"
+        },
+        {
+            "start_page": 355,
+            "end_page": 380,
+            "name": "Chapter 15 Stock Selection for the Enterprising Investor"
+        },
+        {
+            "start_page": 381,
+            "end_page": 399,
+            "name": "Chapter 16 Convertible Issues and Warrants"
+        },
+        {
+            "start_page": 400,
+            "end_page": 421,
+            "name": "Chapter 17 Four Extremely Instructive Case Histories"
+        },
+        {
+            "start_page": 422,
+            "end_page": 463,
+            "name": "Chapter 18 A Comparison of Eight Pairs of Companies"
+        },
+        {
+            "start_page": 464,
+            "end_page": 483,
+            "name": "Chapter 19 Shareholders and Managements Dividend Policy"
+        },
+        {
+            "start_page": 484,
+            "end_page": 506,
+            "name": "Chapter 20 Margin of Safety as the Central Concept of Investment"
+        }
+    ],
+    "llm_provider": "claude",
+    "types": ["long_summary", "short_summary"],
+    "llm_model": "claude-sonnet-4-5-20250929"
+}

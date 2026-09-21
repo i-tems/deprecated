@@ -1,0 +1,17 @@
+services:
+  book-viewer:
+    build: .
+    container_name: book-viewer
+    ports:
+      - "3200:3200"
+    volumes:
+      - ./src:/app
+    restart: always
+    environment:
+      - DISPLAY=:99
+    networks:
+      - shared-network
+
+networks:
+  shared-network:
+    external: true

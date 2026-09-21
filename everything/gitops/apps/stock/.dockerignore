@@ -1,0 +1,24 @@
+**/.git
+**/.DS_Store
+
+# Backend
+backend/__pycache__/
+backend/.venv/
+src/backend/__pycache__/
+src/backend/.venv/
+**/*.pyc
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.turbo/
+src/frontend/node_modules/
+src/frontend/.next/
+src/frontend/out/
+src/frontend/.turbo/
+
+# Misc
+**/*.log
+
+

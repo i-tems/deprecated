@@ -1,0 +1,11 @@
+{
+  "name": "data-product-stock-dart-web_platform-dev",
+  "workspaceFolder": "/workspace",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "anthropic.claude-code"
+      ]
+    }
+  }
+}

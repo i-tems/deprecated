@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-brand: #10b981;
+  --color-brand-light: #d1fae5;
+  --color-brand-dark: #059669;
+  --color-surface: #ffffff;
+  --color-surface-secondary: #f9fafb;
+  --color-surface-tertiary: #f3f4f6;
+  --color-border: #e5e7eb;
+  --color-border-light: #f3f4f6;
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Recharts */
+.recharts-text {
+  fill: #6b7280 !important;
+  font-size: 12px !important;
+}
+.recharts-polar-grid-concentric-polygon {
+  stroke: #e5e7eb !important;
+}
+.recharts-polar-angle-axis-tick-value {
+  fill: #374151 !important;
+  font-size: 12px !important;
+}
+.recharts-cartesian-grid line {
+  stroke: #f3f4f6 !important;
+}

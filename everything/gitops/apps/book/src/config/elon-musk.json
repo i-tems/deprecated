@@ -1,0 +1,489 @@
+{
+    "type": "kindle",
+    "total_page": 670,
+    "top_crop": 250,
+    "bottom_crop": 250,
+    "lang": "eng",
+    "groups": [
+        {
+            "start_page": 1,
+            "end_page": 10,
+            "name": "Introduction"
+        },
+        {
+            "start_page": 11,
+            "end_page": 16,
+            "name": "Chapter 1"
+        },
+        {
+            "start_page": 17,
+            "end_page": 24,
+            "name": "Chapter 2"
+        },
+        {
+            "start_page": 25,
+            "end_page": 31,
+            "name": "Chapter 3"
+        },
+        {
+            "start_page": 32,
+            "end_page": 37,
+            "name": "Chapter 4"
+        },
+        {
+            "start_page": 38,
+            "end_page": 42,
+            "name": "Chapter 5"
+        },
+        {
+            "start_page": 43,
+            "end_page": 47,
+            "name": "Chapter 6"
+        },
+        {
+            "start_page": 48,
+            "end_page": 52,
+            "name": "Chapter 7"
+        },
+        {
+            "start_page": 53,
+            "end_page": 57,
+            "name": "Chapter 8"
+        },
+        {
+            "start_page": 58,
+            "end_page": 62,
+            "name": "Chapter 9"
+        },
+        {
+            "start_page": 63,
+            "end_page": 70,
+            "name": "Chapter 10"
+        },
+        {
+            "start_page": 71,
+            "end_page": 75,
+            "name": "Chapter 11"
+        },
+        {
+            "start_page": 76,
+            "end_page": 83,
+            "name": "Chapter 12"
+        },
+        {
+            "start_page": 84,
+            "end_page": 91,
+            "name": "Chapter 13"
+        },
+        {
+            "start_page": 92,
+            "end_page": 97,
+            "name": "Chapter 14"
+        },
+        {
+            "start_page": 98,
+            "end_page": 103,
+            "name": "Chapter 15"
+        },
+        {
+            "start_page": 104,
+            "end_page": 107,
+            "name": "Chapter 16"
+        },
+        {
+            "start_page": 108,
+            "end_page": 112,
+            "name": "Chapter 17"
+        },
+        {
+            "start_page": 113,
+            "end_page": 118,
+            "name": "Chapter 18"
+        },
+        {
+            "start_page": 119,
+            "end_page": 124,
+            "name": "Chapter 19"
+        },
+        {
+            "start_page": 125,
+            "end_page": 131,
+            "name": "Chapter 20"
+        },
+        {
+            "start_page": 132,
+            "end_page": 142,
+            "name": "Chapter 21"
+        },
+        {
+            "start_page": 143,
+            "end_page": 148,
+            "name": "Chapter 22"
+        },
+        {
+            "start_page": 149,
+            "end_page": 154,
+            "name": "Chapter 23"
+        },
+        {
+            "start_page": 155,
+            "end_page": 160,
+            "name": "Chapter 24"
+        },
+        {
+            "start_page": 161,
+            "end_page": 167,
+            "name": "Chapter 25"
+        },
+        {
+            "start_page": 168,
+            "end_page": 171,
+            "name": "Chapter 26"
+        },
+        {
+            "start_page": 172,
+            "end_page": 175,
+            "name": "Chapter 27"
+        },
+        {
+            "start_page": 176,
+            "end_page": 178,
+            "name": "Chapter 28"
+        },
+        {
+            "start_page": 179,
+            "end_page": 183,
+            "name": "Chapter 29"
+        },
+        {
+            "start_page": 184,
+            "end_page": 190,
+            "name": "Chapter 30"
+        },
+        {
+            "start_page": 191,
+            "end_page": 196,
+            "name": "Chapter 31"
+        },
+        {
+            "start_page": 197,
+            "end_page": 203,
+            "name": "Chapter 32"
+        },
+        {
+            "start_page": 204,
+            "end_page": 209,
+            "name": "Chapter 33"
+        },
+        {
+            "start_page": 210,
+            "end_page": 213,
+            "name": "Chapter 34"
+        },
+        {
+            "start_page": 214,
+            "end_page": 218,
+            "name": "Chapter 35"
+        },
+        {
+            "start_page": 219,
+            "end_page": 223,
+            "name": "Chapter 36"
+        },
+        {
+            "start_page": 224,
+            "end_page": 228,
+            "name": "Chapter 37"
+        },
+        {
+            "start_page": 229,
+            "end_page": 233,
+            "name": "Chapter 38"
+        },
+        {
+            "start_page": 234,
+            "end_page": 237,
+            "name": "Chapter 39"
+        },
+        {
+            "start_page": 238,
+            "end_page": 243,
+            "name": "Chapter 40"
+        },
+        {
+            "start_page": 244,
+            "end_page": 248,
+            "name": "Chapter 41"
+        },
+        {
+            "start_page": 249,
+            "end_page": 255,
+            "name": "Chapter 42"
+        },
+        {
+            "start_page": 256,
+            "end_page": 258,
+            "name": "Chapter 43"
+        },
+        {
+            "start_page": 259,
+            "end_page": 264,
+            "name": "Chapter 44"
+        },
+        {
+            "start_page": 265,
+            "end_page": 272,
+            "name": "Chapter 45"
+        },
+        {
+            "start_page": 273,
+            "end_page": 283,
+            "name": "Chapter 46"
+        },
+        {
+            "start_page": 284,
+            "end_page": 291,
+            "name": "Chapter 47"
+        },
+        {
+            "start_page": 292,
+            "end_page": 300,
+            "name": "Chapter 48"
+        },
+        {
+            "start_page": 301,
+            "end_page": 306,
+            "name": "Chapter 49"
+        },
+        {
+            "start_page": 307,
+            "end_page": 310,
+            "name": "Chapter 50"
+        },
+        {
+            "start_page": 311,
+            "end_page": 316,
+            "name": "Chapter 51"
+        },
+        {
+            "start_page": 317,
+            "end_page": 320,
+            "name": "Chapter 52"
+        },
+        {
+            "start_page": 321,
+            "end_page": 326,
+            "name": "Chapter 53"
+        },
+        {
+            "start_page": 327,
+            "end_page": 329,
+            "name": "Chapter 54"
+        },
+        {
+            "start_page": 330,
+            "end_page": 333,
+            "name": "Chapter 55"
+        },
+        {
+            "start_page": 334,
+            "end_page": 341,
+            "name": "Chapter 56"
+        },
+        {
+            "start_page": 342,
+            "end_page": 348,
+            "name": "Chapter 57"
+        },
+        {
+            "start_page": 349,
+            "end_page": 354,
+            "name": "Chapter 58"
+        },
+        {
+            "start_page": 355,
+            "end_page": 365,
+            "name": "Chapter 59"
+        },
+        {
+            "start_page": 366,
+            "end_page": 371,
+            "name": "Chapter 60"
+        },
+        {
+            "start_page": 372,
+            "end_page": 376,
+            "name": "Chapter 61"
+        },
+        {
+            "start_page": 377,
+            "end_page": 381,
+            "name": "Chapter 62"
+        },
+        {
+            "start_page": 382,
+            "end_page": 386,
+            "name": "Chapter 63"
+        },
+        {
+            "start_page": 387,
+            "end_page": 391,
+            "name": "Chapter 64"
+        },
+        {
+            "start_page": 392,
+            "end_page": 396,
+            "name": "Chapter 65"
+        },
+        {
+            "start_page": 397,
+            "end_page": 400,
+            "name": "Chapter 66"
+        },
+        {
+            "start_page": 401,
+            "end_page": 403,
+            "name": "Chapter 67"
+        },
+        {
+            "start_page": 404,
+            "end_page": 409,
+            "name": "Chapter 68"
+        },
+        {
+            "start_page": 410,
+            "end_page": 419,
+            "name": "Chapter 69"
+        },
+        {
+            "start_page": 420,
+            "end_page": 426,
+            "name": "Chapter 70"
+        },
+        {
+            "start_page": 427,
+            "end_page": 431,
+            "name": "Chapter 71"
+        },
+        {
+            "start_page": 432,
+            "end_page": 441,
+            "name": "Chapter 72"
+        },
+        {
+            "start_page": 442,
+            "end_page": 449,
+            "name": "Chapter 73"
+        },
+        {
+            "start_page": 450,
+            "end_page": 455,
+            "name": "Chapter 74"
+        },
+        {
+            "start_page": 456,
+            "end_page": 463,
+            "name": "Chapter 75"
+        },
+        {
+            "start_page": 464,
+            "end_page": 470,
+            "name": "Chapter 76"
+        },
+        {
+            "start_page": 471,
+            "end_page": 476,
+            "name": "Chapter 77"
+        },
+        {
+            "start_page": 477,
+            "end_page": 482,
+            "name": "Chapter 78"
+        },
+        {
+            "start_page": 483,
+            "end_page": 488,
+            "name": "Chapter 79"
+        },
+        {
+            "start_page": 489,
+            "end_page": 493,
+            "name": "Chapter 80"
+        },
+        {
+            "start_page": 494,
+            "end_page": 498,
+            "name": "Chapter 81"
+        },
+        {
+            "start_page": 499,
+            "end_page": 504,
+            "name": "Chapter 82"
+        },
+        {
+            "start_page": 505,
+            "end_page": 512,
+            "name": "Chapter 83"
+        },
+        {
+            "start_page": 513,
+            "end_page": 522,
+            "name": "Chapter 84"
+        },
+        {
+            "start_page": 523,
+            "end_page": 527,
+            "name": "Chapter 85"
+        },
+        {
+            "start_page": 528,
+            "end_page": 537,
+            "name": "Chapter 86"
+        },
+        {
+            "start_page": 538,
+            "end_page": 543,
+            "name": "Chapter 87"
+        },
+        {
+            "start_page": 544,
+            "end_page": 550,
+            "name": "Chapter 88"
+        },
+        {
+            "start_page": 551,
+            "end_page": 555,
+            "name": "Chapter 89"
+        },
+        {
+            "start_page": 556,
+            "end_page": 563,
+            "name": "Chapter 90"
+        },
+        {
+            "start_page": 564,
+            "end_page": 570,
+            "name": "Chapter 91"
+        },
+        {
+            "start_page": 571,
+            "end_page": 580,
+            "name": "Chapter 92"
+        },
+        {
+            "start_page": 581,
+            "end_page": 587,
+            "name": "Chapter 93"
+        },
+        {
+            "start_page": 588,
+            "end_page": 594,
+            "name": "Chapter 94"
+        },
+        {
+            "start_page": 595,
+            "end_page": 603,
+            "name": "Chapter 95"
+        }
+    ]
+}

@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: piano-frontend-prd
+resources:
+  - ../../base
+images:
+  - name: registry.lab.i-tems.com/piano-frontend
+    newTag: 'a387376'

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meetup-scheduler-frontend
+  namespace: meetup-scheduler
+  labels:
+    app: meetup-scheduler-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: meetup-scheduler-frontend
+  template:
+    metadata:
+      labels:
+        app: meetup-scheduler-frontend
+    spec:
+      containers:
+        - name: meetup-scheduler-frontend
+          image: registry.lab.i-tems.com/meetup-scheduler-frontend:SEED
+          env:
+            - name: HOSTNAME
+              value: "0.0.0.0"
+            - name: PORT
+              value: "3000"
+          ports:
+            - containerPort: 3000
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 60
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n-back-backend
+  namespace: n-back
+  labels:
+    app: n-back-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: n-back-backend
+  template:
+    metadata:
+      labels:
+        app: n-back-backend
+    spec:
+      containers:
+        - name: backend
+          image: registry.lab.i-tems.com/items-app-n-back-backend:4cb2133
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom:
+            - secretRef:
+                name: n-back-backend
+          readinessProbe:
+            httpGet:
+              path: /docs
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /docs
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meetup-scheduler-backend
+  labels:
+    app: meetup-scheduler-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: meetup-scheduler-backend
+  template:
+    metadata:
+      labels:
+        app: meetup-scheduler-backend
+    spec:
+      containers:
+        - name: meetup-scheduler-backend
+          image: registry.lab.i-tems.com/meetup-scheduler-backend:SEED
+          env:
+            - name: HOSTNAME
+              value: "0.0.0.0"
+          envFrom:
+            - secretRef:
+                name: meetup-scheduler-backend
+          ports:
+            - containerPort: 8000
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /docs
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /docs
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 60
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: meetup-scheduler-backend-data

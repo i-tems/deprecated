@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: meetup-scheduler-frontend
+  namespace: meetup-scheduler
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: meetup.i-tems.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: meetup-scheduler-frontend
+                port:
+                  number: 80

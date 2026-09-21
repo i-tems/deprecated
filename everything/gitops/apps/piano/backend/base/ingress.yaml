@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: piano-backend
+  namespace: piano
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: api-piano.i-tems.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: piano-backend
+                port:
+                  number: 80

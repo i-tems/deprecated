@@ -1,0 +1,6 @@
+{
+    "type": "pdf",
+    "text_split_by": "SUB_HEADING",
+    "group_split_by": "CHAPTER ",
+    "types": ["long_summary", "short_summary", "translated"]
+}

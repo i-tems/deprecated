@@ -1,0 +1,46 @@
+# Shared Claude credential mount.
+#
+# The ai app runs `claude` (Max-subscription OAuth). Its old bootstrap-from-Secret
+# token kept expiring (the app calls claude rarely, so the access token died
+# before claude could auto-refresh, and a dead access token can't refresh).
+#
+# Instead we mount the SAME NFS directory the hive Loop workers use for their
+# `~/.claude`. The hive worker fleet runs constantly, so the claude SDK there
+# keeps the access token auto-refreshed and the refresh-token chain alive. By
+# sharing the one physical credentials file (not copying it) there is a single
+# refresh writer — no refresh-token-rotation collision between two installs.
+#
+# This PV points at the same NFS export that backs the hive `hive-data` PVC
+# (server 10.43.11.23, path /export/pvc-401c530e-1d21-4154-b9bb-e2033a2da87a),
+# subPath `shared` → identical to hive workers' HOME=/shared.
+#
+# reclaimPolicy: Retain — this is a manually-defined PV with no provisioner, so
+# deleting it never deletes the NFS data (which is hive's live working set).
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ai-claude-shared
+spec:
+  capacity:
+    storage: 20Gi
+  accessModes: ["ReadWriteMany"]
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  nfs:
+    server: 10.43.11.23
+    path: /export/pvc-401c530e-1d21-4154-b9bb-e2033a2da87a
+  claimRef:
+    namespace: ai-prd
+    name: ai-claude-shared
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ai-claude-shared
+spec:
+  accessModes: ["ReadWriteMany"]
+  storageClassName: ""
+  volumeName: ai-claude-shared
+  resources:
+    requests:
+      storage: 20Gi

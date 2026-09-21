@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n-back-frontend
+  namespace: n-back
+  labels:
+    app: n-back-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: n-back-frontend
+  template:
+    metadata:
+      labels:
+        app: n-back-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: registry.lab.i-tems.com/items-app-n-back-frontend:e776f34
+          env:
+            - name: HOSTNAME
+              value: "0.0.0.0"
+          ports:
+            - containerPort: 3000
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

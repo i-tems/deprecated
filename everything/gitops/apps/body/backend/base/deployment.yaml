@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: body-backend
+  labels:
+    app: body-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: body-backend
+  template:
+    metadata:
+      labels:
+        app: body-backend
+    spec:
+      containers:
+        - name: body-backend
+          image: registry.lab.i-tems.com/body-backend:SEED
+          env:
+            - name: HOSTNAME
+              value: "0.0.0.0"
+          ports:
+            - containerPort: 8000
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /docs
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /docs
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 60
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: body-backend-data

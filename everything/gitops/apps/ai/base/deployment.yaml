@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai
+  namespace: ai
+  labels:
+    app: ai
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: ai
+  template:
+    metadata:
+      labels:
+        app: ai
+    spec:
+      # Run as the same uid/gid as the hive Loop workers (agent:1000) so the
+      # SHARED ~/.claude/.credentials.json (mode 0600, owned 1000:1000 on the
+      # NFS export) is readable, and claude's in-place token refresh rewrites
+      # it still owned 1000:1000 — keeping the hive worker fleet able to read
+      # it. fsGroup 1000 makes the local-path /data volume group-writable.
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: ai
+          image: registry.lab.i-tems.com/ai:SEED
+          envFrom:
+            - secretRef:
+                name: ai
+          # claude resolves ~/.claude from HOME; point it at the shared NFS
+          # mount, exactly like the hive workers (HOME=/shared).
+          env:
+            - name: HOME
+              value: /shared
+          ports:
+            - containerPort: 8000
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 60
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 2000m
+              memory: 1Gi
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            # subPath `shared` → /shared is the exact directory the hive
+            # workers use as HOME; /shared/.claude/.credentials.json is the
+            # single physical credential file shared with them.
+            - name: shared
+              mountPath: /shared
+              subPath: shared
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: ai-data
+        - name: shared
+          persistentVolumeClaim:
+            claimName: ai-claude-shared

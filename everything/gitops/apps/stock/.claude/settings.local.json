@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ps aux:*)",
+      "Bash(docker stats:*)",
+      "Bash(sort -k3 -t'/' -h -r)",
+      "Bash(awk '{sum += $6} END {print \"Total RSS: \" sum/1024 \" MB\"}')",
+      "Bash(awk 'NR<=30 {printf \"%6d MB  %s\\\\n\", $6/1024, $11}')",
+      "Bash(slabtop -o -s c)",
+      "Bash(snap list:*)",
+      "Bash(docker system:*)",
+      "Bash(smem -t -k)",
+      "Read(//sys/fs/cgroup/**)",
+      "Bash(mount)",
+      "Bash(awk '{print $1/1024/1024 \" MB - dockerd\"}')",
+      "Bash(awk '{print $1/1024/1024 \" MB - containerd\"}')",
+      "Bash(awk '{print \"current: \" $1/1024/1024 \" MB\"}')",
+      "Bash(awk '{print $1/1024/1024/1024 \" GB - total cgroup root\"}')",
+      "Bash(dmesg)",
+      "Bash(awk ':*)",
+      "Bash(awk '/pages free/ {free+=$3} /nr_zone_active_anon/ {aa+=$2} /nr_zone_inactive_anon/ {ia+=$2} /nr_zone_active_file/ {af+=$2} /nr_zone_inactive_file/ {if_+=$2} /nr_kernel_misc_reclaimable/ {kr+=$2} /nr_bounce/ {b+=$2} END {printf \"Free: %.1f GB\\\\nActive Anon: %.1f GB\\\\nInactive Anon: %.1f GB\\\\nActive File: %.1f GB\\\\nInactive File: %.1f GB\\\\n\", free*4/1024/1024, aa*4/1024/1024, ia*4/1024/1024, af*4/1024/1024, if_*4/1024/1024}')"
+    ]
+  }
+}

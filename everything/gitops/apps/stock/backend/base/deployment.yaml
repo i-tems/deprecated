@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stock-backend
+  namespace: stock
+  labels:
+    app: stock-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stock-backend
+  template:
+    metadata:
+      labels:
+        app: stock-backend
+    spec:
+      containers:
+        - name: stock-backend
+          image: registry.lab.i-tems.com/stock-backend:SEED
+          env:
+            - name: HOSTNAME
+              value: "0.0.0.0"
+          ports:
+            - containerPort: 8001
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /docs
+              port: 8001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /docs
+              port: 8001
+            initialDelaySeconds: 15
+            periodSeconds: 60
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi

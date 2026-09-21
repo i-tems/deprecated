@@ -1,0 +1,90 @@
+{
+    "type": "kindle",
+    "total_page": 405,
+    "top_crop": 250,
+    "bottom_crop": 250,
+    "types": ["long_summary", "short_summary", "translated"],
+    "lang": "eng",
+    "groups": [
+        {
+            "start_page": 1,
+            "end_page": 11,
+            "name": "Introduction"
+        },
+        {
+            "start_page": 14,
+            "end_page": 23,
+            "name": "Chapter 1 Understanding Data Mesh: The Essentials"
+        },
+        {
+            "start_page": 24,
+            "end_page": 45,
+            "name": "Chapter 2 Applying Data Mesh Principles"
+        },
+        {
+            "start_page": 46,
+            "end_page": 57,
+            "name": "Chapter 3 Our Case Study: Climate Quantum Inc."
+        },
+        {
+            "start_page": 60,
+            "end_page": 83,
+            "name": "Chapter 4 Defining the Data Mesh Architecture"
+        },
+        {
+            "start_page": 84,
+            "end_page": 110,
+            "name": "Chapter 5 Driving Data Products with Data Contracts"
+        },
+        {
+            "start_page": 111,
+            "end_page": 125,
+            "name": "Chapter 6 Building Your First Data Product"
+        },
+        {
+            "start_page": 126,
+            "end_page": 141,
+            "name": "Chapter 7 Aligning with the Experience Planes"
+        },
+        {
+            "start_page": 142,
+            "end_page": 152,
+            "name": "Chapter 8 Meshing Your Data Products"
+        },
+        {
+            "start_page": 155,
+            "end_page": 169,
+            "name": "Chapter 9 Running and Operating Your Data Mesh"
+        },
+        {
+            "start_page": 170,
+            "end_page": 189,
+            "name": "Chapter 10 Creating a Data Mesh Marketplace"
+        },
+        {
+            "start_page": 190,
+            "end_page": 200,
+            "name": "Chapter 11 Establishing Data Mesh Governance"
+        },
+        {
+            "start_page": 201,
+            "end_page": 208,
+            "name": "Chapter 12 Understanding Data Product Supply Chains"
+        },
+        {
+            "start_page": 209,
+            "end_page": 219,
+            "name": "Chapter 13 Integrating Data Mesh and Generative AI"
+        },
+        {
+            "start_page": 220,
+            "end_page": 230,
+            "name": "Chapter 14 Establishing Data Mesh Teams"
+        },
+        {
+            "start_page": 231,
+            "end_page": 242,
+            "name": "Chapter 15 Defining a Data Mesh Operating Model"
+        }
+    ]
+}

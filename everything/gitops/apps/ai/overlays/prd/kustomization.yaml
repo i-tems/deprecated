@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ai-prd
+resources:
+  - ../../base
+images:
+  - name: registry.lab.i-tems.com/ai
+    newTag: fa56a37

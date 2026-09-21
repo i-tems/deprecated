@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: piano-frontend
+  namespace: piano
+  labels:
+    app: piano-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: piano-frontend
+  template:
+    metadata:
+      labels:
+        app: piano-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: registry.lab.i-tems.com/piano-frontend:SEED
+          env:
+            - name: HOSTNAME
+              value: "0.0.0.0"
+          ports:
+            - containerPort: 3000
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

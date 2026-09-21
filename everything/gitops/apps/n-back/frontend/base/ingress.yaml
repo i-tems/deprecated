@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: n-back-frontend
+  namespace: n-back
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: n-back.i-tems.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: n-back-frontend
+                port:
+                  number: 80

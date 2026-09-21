@@ -1,0 +1,89 @@
+{
+    "type": "kindle",
+    "total_page": 367,
+    "top_crop": 120,
+    "bottom_crop": 120,
+    "lang": "eng",
+    "groups": [
+        {
+            "start_page": 4,
+            "end_page": 12,
+            "name": "Introduction"
+        },
+        {
+            "start_page": 14,
+            "end_page": 25,
+            "name": "Chapter 1 Mind the Semantic Gap"
+        },
+        {
+            "start_page": 26,
+            "end_page": 52,
+            "name": "Chapter 2 Semantic Modeling Elements"
+        },
+        {
+            "start_page": 53,
+            "end_page": 68,
+            "name": "Chapter 3 Semantic and Linguistic Phenomena"
+        },
+        {
+            "start_page": 69,
+            "end_page": 84,
+            "name": "Chapter 4 Semantic Model Quality"
+        },
+        {
+            "start_page": 85,
+            "end_page": 112,
+            "name": "Chapter 5 Semantic Model Development"
+        },
+        {
+            "start_page": 114,
+            "end_page": 141,
+            "name": "Chapter 6 Bad Descriptions"
+        },
+        {
+            "start_page": 142,
+            "end_page": 160,
+            "name": "Chapter 7 Bad Semantics"
+        },
+        {
+            "start_page": 161,
+            "end_page": 195,
+            "name": "Chapter 8 Bad Model Specification and Knowledge Acquisition"
+        },
+        {
+            "start_page": 196,
+            "end_page": 211,
+            "name": "Chapter 9 Bad Quality Management"
+        },
+        {
+            "start_page": 212,
+            "end_page": 235,
+            "name": "Chapter 10 Bad Application"
+        },
+        {
+            "start_page": 236,
+            "end_page": 252,
+            "name": "Chapter 11 Bad Strategy and Organization"
+        },
+        {
+            "start_page": 254,
+            "end_page": 280,
+            "name": "Chapter 12 Representation Dilemmas"
+        },
+        {
+            "start_page": 281,
+            "end_page": 299,
+            "name": "Chapter 13 Expressiveness and Content Dilemmas"
+        },
+        {
+            "start_page": 300,
+            "end_page": 319,
+            "name": "Chapter 14 Evolution and Governance Dilemmas"
+        },
+        {
+            "start_page": 320,
+            "end_page": 327,
+            "name": "Chapter 15 Looking Ahead"
+        }
+    ]
+}

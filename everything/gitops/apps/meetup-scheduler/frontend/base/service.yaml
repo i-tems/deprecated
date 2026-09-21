@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: meetup-scheduler-frontend
+  namespace: meetup-scheduler
+  labels:
+    app: meetup-scheduler-frontend
+spec:
+  type: ClusterIP
+  selector:
+    app: meetup-scheduler-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+      protocol: TCP

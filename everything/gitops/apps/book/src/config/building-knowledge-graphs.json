@@ -1,0 +1,81 @@
+{
+    "type": "pdf",
+    "group_split_by": "CHAPTER ",
+    "groups": [
+        {
+            "name": "Introduction",
+            "start_page": 0,
+            "end_page": 0
+        },
+        {
+            "name": "CHAPTER 1 Introducing Knowledge Graphs",
+            "start_page": 1,
+            "end_page": 1
+        },
+        {
+            "name": "CHAPTER 2 Organizing Principles for Building Knowledge Graphs",
+            "start_page": 2,
+            "end_page": 2
+        },
+        {
+            "name": "CHAPTER 3 Graph Databases",
+            "start_page": 3,
+            "end_page": 3
+        },
+        {
+            "name": "CHAPTER 4 Loading Knowledge Graph Data",
+            "start_page": 4,
+            "end_page": 4
+        },
+        {
+            "name": "CHAPTER 5 Integrating Knowledge Graphs with Information Systems",
+            "start_page": 5,
+            "end_page": 5
+        },
+        {
+            "name": "CHAPTER 6 Enriching Knowledge Graphs with Data Science",
+            "start_page": 6,
+            "end_page": 6
+        },
+        {
+            "name": "CHAPTER 7 Graph-Native Machine Learning",
+            "start_page": 7,
+            "end_page": 7
+        },
+        {
+            "name": "CHAPTER 8 Mapping Data with Metadata Knowledge Graphs",
+            "start_page": 8,
+            "end_page": 8
+        },
+        {
+            "name": "CHAPTER 9 Identity Knowledge Graphs",
+            "start_page": 9,
+            "end_page": 9
+        },
+        {
+            "name": "CHAPTER 10 Pattern Detection Knowledge Graphs",
+            "start_page": 10,
+            "end_page": 10
+        },
+        {
+            "name": "CHAPTER 11 Dependency Knowledge Graphs",
+            "start_page": 11,
+            "end_page": 11
+        },
+        {
+            "name": "CHAPTER 12 Semantic Search and Similarity",
+            "start_page": 12,
+            "end_page": 12
+        },
+        {
+            "name": "CHAPTER 13 Talking to Your Knowledge Graph",
+            "start_page": 13,
+            "end_page": 13
+        },
+        {
+            "name": "CHAPTER 14 From Knowledge Graphs to Knowledge Lakes",
+            "start_page": 14,
+            "end_page": 14
+        }
+    ]
+}

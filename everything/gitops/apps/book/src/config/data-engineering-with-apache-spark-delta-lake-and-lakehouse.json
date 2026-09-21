@@ -1,0 +1,69 @@
+{
+    "type": "kindle",
+    "total_page": 622,
+    "top_crop": 120,
+    "bottom_crop": 110,
+    "lang": "eng",
+    "groups": [
+        {
+            "start_page": 21,
+            "end_page": 38,
+            "name": "Chapter 1: The Story of Data Engineering and Analytics"
+        },
+        {
+            "start_page": 39,
+            "end_page": 75,
+            "name": "Chapter 2: Discovering Storage and Compute Data Lakes"
+        },
+        {
+            "start_page": 76,
+            "end_page": 103,
+            "name": "Chapter 3: Data Engineering on Microsoft Azure"
+        },
+        {
+            "start_page": 104,
+            "end_page": 120,
+            "name": "Chapter 4: Understanding Data Pipelines"
+        },
+        {
+            "start_page": 121,
+            "end_page": 190,
+            "name": "Chapter 5: Data Collection Stage - The Bronze Layer"
+        },
+        {
+            "start_page": 191,
+            "end_page": 228,
+            "name": "Chapter 6: Understanding Delta Lake"
+        },
+        {
+            "start_page": 229,
+            "end_page": 280,
+            "name": "Chapter 7: Data Curation Stage - The Silver Layer"
+        },
+        {
+            "start_page": 281,
+            "end_page": 329,
+            "name": "Chapter 8: Data Aggregation Stage - The Gold Layer"
+        },
+        {
+            "start_page": 330,
+            "end_page": 365,
+            "name": "Chapter 9: Deploying and Monitoring Pipelines in Production"
+        },
+        {
+            "start_page": 366,
+            "end_page": 427,
+            "name": "Chapter 10: Solving Data Engineering Challenges"
+        },
+        {
+            "start_page": 428,
+            "end_page": 451,
+            "name": "Chapter 11: Infrastructure Provisioning"
+        },
+        {
+            "start_page": 452,
+            "end_page": 519,
+            "name": "Chapter 12: Continuous Integration and Deployment (CI/CD) of Data Pipelines"
+        }
+    ]
+}

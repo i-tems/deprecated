@@ -1,0 +1,83 @@
+{
+    "type": "kindle",
+    "total_page": 652,
+    "top_crop": 250,
+    "bottom_crop": 250,
+    "types": ["long_summary", "short_summary", "translated"],
+    "lang": "eng",
+    "llm_provider": "openai",
+    "llm_model": "gpt-4o-mini",
+    "groups": [
+
+        {
+            "start_page": 1,
+            "end_page": 27,
+            "name": "Chapter 1 From Data as a Byproduct to Data as a Product"
+        },
+        {
+            "start_page": 28,
+            "end_page": 68,
+            "name": "Chapter 2 Data Products"
+        },
+        {
+            "start_page": 69,
+            "end_page": 107,
+            "name": "Chapter 3 Data Product-Centered Architectures"
+        },
+        {
+            "start_page": 108,
+            "end_page": 144,
+            "name": "Chapter 4 Identifying Data Products and Prioritizing Developments"
+        },
+        {
+            "start_page": 145,
+            "end_page": 180,
+            "name": "Chapter 5 Designing and Implementing Data Products"
+        },
+        {
+            "start_page": 181,
+            "end_page": 211,
+            "name": "Chapter 6 Operating Data Products in Production"
+        },
+        {
+            "start_page": 212,
+            "end_page": 243,
+            "name": "Chapter 7 Automating Data Product Lifecycle Management"
+        },
+        {
+            "start_page": 244,
+            "end_page": 276,
+            "name": "Chapter 8 Moving through the Adoption Journey"
+        },
+        {
+            "start_page": 277,
+            "end_page": 309,
+            "name": "Chapter 9 Team Topologies and Data Ownership at Scale"
+        },
+        {
+            "start_page": 310,
+            "end_page": 347,
+            "name": "Chapter 10 Distributed Data Modeling"
+        },
+        {
+            "start_page": 348,
+            "end_page": 381,
+            "name": "Chapter 11 Building an Al-Ready Information Architecture"
+        },
+        {
+            "start_page": 382,
+            "end_page": 405,
+            "name": "Chapter 12 Bringing It All Together"
+        },
+        {
+            "start_page": 209,
+            "end_page": 219,
+            "name": "Chapter 13 Integrating Data Mesh and Generative AI"
+        },
+        {
+            "start_page": 220,
+            "end_page": 230,
+            "name": "Chapter 14 Establishing Data Mesh Teams"
+        }
+    ]
+}
